@@ -9,6 +9,11 @@ import type { ReactElement } from 'react'
 
 export default function WorkspaceArea() {
     const { activeContent } = useWorkspaceStore()
+    if(!activeContent) return
+    const {id, component, fileName, fileContents, metaData} = activeContent
+    
+    const comp = activeContent?.component == "ContentArea" ? "ContentArea" : "";
+    if(!comp) return
 
     const handleKeyEvent = (event: KeyboardEvent, ) => {
         //need to get the id of content.
@@ -16,10 +21,16 @@ export default function WorkspaceArea() {
     
     return (
         <div className="workspace-area">
-            {activeContent?.component === "canvas" 
-            ? <CanvasArea /> 
-            : <ContentArea Tag="p" id="content-1" >{activeContent?.workspaceContent}</ContentArea>
-        }
+          {fileContents.map((item) => {
+            return <ContentArea Tag={item.Tag} id={item.id} >{item.innerContent}</ContentArea>
+          })}
         </div>
     )
 }
+
+/*
+{activeContent?.component === "canvas" 
+            
+? <CanvasArea /> 
+: <ContentArea Tag="p" id="content-1" >{activeContent?.workspaceContent}</ContentArea>}
+*/

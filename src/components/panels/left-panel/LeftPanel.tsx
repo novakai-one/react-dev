@@ -24,7 +24,7 @@ export default function LeftPanel() {
     const initialFileData: FilePanelPiece = {
         kind: "files",
         tileName: "Files",
-        panelBody: [{ id: "file-1", fileName: "first file", fileContents: initialElements, metaData: startingMetaData, tags: [""] }]
+        panelBody: [{ id: "file-1", component:"ContentArea", fileName: "first file", fileContents: initialElements, metaData: startingMetaData, tags: [""] }]
     }
 
     const piecesPanelData: PiecesPanelPiece = {

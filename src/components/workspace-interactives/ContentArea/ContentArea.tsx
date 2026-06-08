@@ -7,7 +7,7 @@ import './content-area.css'
 
 interface ContentAreaProps{
     children?: string,
-    Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span",
+    Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span" | "ol" | "ul" | "li" | "div",
     id: string
 }
 
@@ -19,14 +19,14 @@ export default function ContentArea({children, Tag, id}: ContentAreaProps){
         //give this back to whoever called it.
     }
 
-    const contentRef = useRef<HTMLParagraphElement | HTMLHeadingElement>(null);
+    const contentRef = useRef<HTMLParagraphElement | HTMLHeadingElement | HTMLSpanElement>(null);
     
 
     return (
         <div>
             
             <Tag 
-            ref={contentRef}
+            //ref={contentRef}
             className="content-area"
             contentEditable={true}
             onKeyUp={handleKeyEvent}

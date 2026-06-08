@@ -1,13 +1,12 @@
-import {create} from 'zustand'
-import type { PageContent } from '../panels/shared/panel/Panel'
+import { create } from 'zustand'
+import type { TextFile } from '../../types/types'
 
-interface WorkspaceStore{
-    activeContent: PageContent | null
-    setActiveContent: (content: PageContent) => void
+interface WorkspaceStore {
+    activeContent: TextFile | null
+    setActiveContent: (content: TextFile) => void
 }
 
-//create workspace store const and put in 2 things - state and actions.
 export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
-    activeContent:null,
-    setActiveContent: (content) => set({activeContent: content})
+    activeContent: null,
+    setActiveContent: (content) => set({ activeContent: content })
 }))

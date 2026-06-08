@@ -7,6 +7,7 @@ export interface MetaData{
 
 export interface TextFile {
     id: string,
+    component: "ContentArea"
     fileName: string,
     fileContents: TextElement[],
     metaData: MetaData,
