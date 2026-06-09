@@ -4,6 +4,8 @@
     min-height: 20px;
     border-radius: 4px;
     border: 1px transparent;
+    position: relative;
+    left: 250px;
     
     transition: none;
     display: flex;
@@ -18,7 +20,7 @@
 }
 
 .panel-toggle-open-false{
-    position: absolute;
+    position: relative;
     left:0px;
     width: 40px;
     visibility: visible;

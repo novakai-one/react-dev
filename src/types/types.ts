@@ -30,7 +30,8 @@ export interface TextElement {
     innerContent: string,
     layout?: string //create layoutData once relevant.
     //parent and child 
-    parentId: string | null //this would tell me if the next element is a sibling or child.
+    parentId: string | null //this would tell me if the next element is a sibling or child.,
+    children?: TextElement[]
 }
 
 

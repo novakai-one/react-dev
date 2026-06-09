@@ -1,9 +1,11 @@
 .editor{
     display: flex;
+    flex-direction: column;
     flex: 1;
     align-items: stetch;
     height: 80%;
     min-height: 800px;
+    flex-grow: 1;
     
     
 }

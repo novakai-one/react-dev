@@ -2,37 +2,41 @@
 
 import { useRef, type HTMLElementType } from 'react'
 import './content-area.css'
+import type { TextElement } from '../../../types/types'
 
 
 
-interface ContentAreaProps{
-    children?: string,
-    Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span" | "ol" | "ul" | "li" | "div",
-    id: string
+interface ContentAreaProps {
+    activeContent: TextElement
 }
 
-export default function ContentArea({children, Tag, id}: ContentAreaProps){
+
+export default function ContentArea({activeContent}: ContentAreaProps) {
+    const {Tag, innerContent, id, classNames, children} = activeContent
+
     
-    //need to save data as I go.
     const handleKeyEvent = (event: React.KeyboardEvent) => {
         //on key event update the stored saved data.
         //give this back to whoever called it.
     }
 
-    const contentRef = useRef<HTMLParagraphElement | HTMLHeadingElement | HTMLSpanElement>(null);
+    //const contentRef = useRef<HTMLParagraphElement | HTMLHeadingElement | HTMLSpanElement>(null);
     
 
     return (
-        <div>
-            
+        <div className="content-area">
             <Tag 
             //ref={contentRef}
-            className="content-area"
+            id={id}
+            className={classNames}
             contentEditable={true}
             onKeyUp={handleKeyEvent}
-
-             >{children}</Tag>
-             
+            >
+                {innerContent}
+                {children?.map(child => (
+                    <ContentArea activeContent={child} />
+                ))}
+            </Tag>
         </div>
     )
 }

@@ -13,7 +13,7 @@ export interface PanelProps {
 
 export default function Panel({ cn, panelData: pd }: PanelProps) {
 
-    const { setActiveContent } = useWorkspaceStore()
+    const { setActiveFile } = useWorkspaceStore()
 
     const tileNames: string[] = pd.map(panel => panel.tileName)
 
@@ -35,7 +35,7 @@ export default function Panel({ cn, panelData: pd }: PanelProps) {
         setSelectedBodyItem(name)
         if (selectedPanelData.kind === "files") {
             const file = selectedPanelData.panelBody.find(f => f.fileName === name)
-            if (file) setActiveContent(file)
+            if (file) setActiveFile(file)
         }
     }
 
