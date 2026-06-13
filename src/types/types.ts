@@ -31,8 +31,13 @@ export interface TextElement {
     layout?: string //create layoutData once relevant.
     //parent and child 
     parentId: string | null //this would tell me if the next element is a sibling or child.,
-    children?: TextElement[]
+    children: string[] | null //TextElement[] | null - 
 }
+//Record<DataSet, DataType>
+
+
+
+
 
 
 export interface PiecesPanelData{

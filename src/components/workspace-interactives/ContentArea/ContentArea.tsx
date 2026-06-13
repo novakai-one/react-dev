@@ -34,7 +34,7 @@ export default function ContentArea({activeContent}: ContentAreaProps) {
             >
                 {innerContent}
                 {children?.map(child => (
-                    <ContentArea activeContent={child} />
+                    <ContentArea activeContent={children} />
                 ))}
             </Tag>
         </div>
