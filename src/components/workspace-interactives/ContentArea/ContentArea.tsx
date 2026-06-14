@@ -2,18 +2,17 @@
 
 import { useRef, type HTMLElementType } from 'react'
 import './content-area.css'
-import type { TextElement } from '../../../types/types'
-
+import type { ContentDataSet, TextElement } from '../../../types/types'
 
 
 interface ContentAreaProps {
-    activeContent: TextElement
+    activeContent: TextElement,
+    contentDataSet: ContentDataSet
 }
 
 
-export default function ContentArea({activeContent}: ContentAreaProps) {
+export default function ContentArea( {activeContent, contentDataSet }: ContentAreaProps) {
     const {Tag, innerContent, id, classNames, children} = activeContent
-
     
     const handleKeyEvent = (event: React.KeyboardEvent) => {
         //on key event update the stored saved data.
@@ -21,7 +20,6 @@ export default function ContentArea({activeContent}: ContentAreaProps) {
     }
 
     //const contentRef = useRef<HTMLParagraphElement | HTMLHeadingElement | HTMLSpanElement>(null);
-    
 
     return (
         <div className="content-area">
@@ -33,9 +31,12 @@ export default function ContentArea({activeContent}: ContentAreaProps) {
             onKeyUp={handleKeyEvent}
             >
                 {innerContent}
-                {children?.map(child => (
-                    <ContentArea activeContent={children} />
-                ))}
+                {children?.map((child) => {
+                    const childNode = contentDataSet[child]
+                    return <ContentArea 
+                        activeContent={childNode}
+                        contentDataSet={contentDataSet} />
+                })}
             </Tag>
         </div>
     )

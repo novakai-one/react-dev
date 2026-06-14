@@ -7,8 +7,18 @@ import RightPanel from './components/panels/right-panel/RightPanel'
 import { useEffect } from 'react'
 import type { DataSet, MetaData } from './types/types'
 import { useDocumentStorage } from './storage/useDocumentStorage'
+import { useWorkspaceStore } from './components/store/useWorkspaceStore'
 
 export default function App() {
+  const {saveDocument, loadDocument} = useDocumentStorage();
+  const { setActiveFile, setDataSet } = useWorkspaceStore();
+  useEffect(() => {
+    setDataSet(files, content)
+  }, [])
+
+  const ds =  loadDocument()
+  if(!ds) return 
+  const {files, content} = ds
   
 
   //boilerplate starting data.
@@ -19,6 +29,7 @@ const startingMetaData: MetaData = {
     lastEdited: "2026-06-09 2:41am",
 }
       
+/*
 const startingDataSet: DataSet = {
   content: {
       1: { id: "1", component: "ContentArea", Tag: "h1", styles: "", classNames: "title", innerContent: "My Document", parentId: null, children: null, files: ["1"] },
@@ -33,13 +44,20 @@ const startingDataSet: DataSet = {
       1: { id: "file-1", fileName: "first file", content: ["1", "2", "3", "4", "5", "6", "7"], metaData: startingMetaData, tags: [""] }
   }
 }
+  */
   
-
-
+  
+  /*
   useEffect(() => {
-    const storedDataSet = useDocumentStorage().loadDocument()
-    if(!storedDataSet) useDocumentStorage().saveDocument(startingDataSet.files, startingDataSet.content)
+    //const storedDataSet = useDocumentStorage().loadDocument()
+    //going to delete anyway so may as well remove the if.
+    saveDocument(startingDataSet.files, startingDataSet.content)
   }, [])
+  */
+ 
+
+  
+  
 
   return (
     <div className="app">

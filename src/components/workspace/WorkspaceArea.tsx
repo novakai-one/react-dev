@@ -4,47 +4,34 @@ import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import './workspace.css'
 import CanvasArea from '../workspace-interactives/CanvasArea/CanvasArea'
 import ContentArea from '../workspace-interactives/ContentArea/ContentArea'
-import type { TextElement } from '../../types/types'
+import type { TextElement, ContentDataSet } from '../../types/types'
+import { useDocumentStorage } from '../../storage/useDocumentStorage'
 
 
-//object storing the Component. key/value same lookup value so collapses to single word. ContentArea: ContentArea
 const COMPONENT_REGISTRY = {
     ContentArea,
     CanvasArea,
   }
 
-  //Each node will be turned into a UI component.
-
-  //Build the node tree 
-  //This only does parent/children at the moment -> grandchildren are left out.
-  // So now I need to go and find all the nodes remaining and do a recursive search to add them to the children until theres none left.
-  function buildTree(nodes: TextElement[]): TextElement[] {
+function buildRoots(nodes: TextElement[]): TextElement[] {
     return nodes
-        .filter(node => node.parentId === null) //find top level nodes
-        .map(node => ({
-            ...node, //Append children to the top level nodes for component recursion later.
-            children: nodes.filter(child => child.parentId === node.id) 
-        }))
+    .filter(node => node.parentId === null)
 }
 
-function buildRoots(nodes: TextElement[])
-
-//I need to get the keys for the Record content and then map through the keys 
-//I could also use Object.entries() to get the key values out in one go.
 
 export default function WorkspaceArea() {
-    const { activeFile } = useWorkspaceStore()
-    //active File has type TextFile. It has file metadata and fileContents which has all the page content (nodes)
-    if(!activeFile) return
-    //The content to be displayed on workspace.
-    const { fileContents } = activeFile
-
-    const tree = buildTree(fileContents)
-    if(!tree) return
+    const { activeFile, content: contentDataSet } = useWorkspaceStore()
     
-    //activeFile is the filename on teh side. fileContents is the array of nodes I want to become components.
+    if(!activeFile) return
+    if(!contentDataSet) return
+    
+    const { content: contentKeys } = activeFile
+    const fileContents: TextElement[] = contentKeys.map((item) => contentDataSet[item])
 
-    //const ComponentToRender = COMPONENT_REGISTRY[activeFile.component]
+
+    const roots = buildRoots(fileContents)
+    if(!roots) return
+    
 
     const handleKeyEvent = (event: KeyboardEvent, ) => {
         //need to get the id of content.
@@ -52,13 +39,13 @@ export default function WorkspaceArea() {
     
     return (
         <div className="workspace-area">
-            {/* {tree.map((node) => {
+          {/*  Take the root nodes and turn each of them into a component. Children will be populated iteratively inside component as children willl be passed down.*/ }
+           {roots.map((node) => {
             const ComponentToRender = COMPONENT_REGISTRY[node.component as keyof typeof COMPONENT_REGISTRY]
-            return <ComponentToRender activeContent={node} />
-          })} */}
-           {fileContents.map((node) => {
-            const ComponentToRender = COMPONENT_REGISTRY[node.component as keyof typeof COMPONENT_REGISTRY]
-            return <ComponentToRender activeContent={node} />
+            return <ComponentToRender 
+                    contentDataSet={contentDataSet}
+                    activeContent={node} 
+                    />
            })}
         </div>
     )
