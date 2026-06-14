@@ -20,7 +20,9 @@ function buildRoots(nodes: TextElement[]): TextElement[] {
 
 
 export default function WorkspaceArea() {
-    const { activeFile, content: contentDataSet } = useWorkspaceStore()
+    const { activeFile, content: contentDataSet, setContent } = useWorkspaceStore()
+    const { saveContentData } = useDocumentStorage()
+    
     
     if(!activeFile) return
     if(!contentDataSet) return
@@ -32,9 +34,14 @@ export default function WorkspaceArea() {
     const roots = buildRoots(fileContents)
     if(!roots) return
     
-
-    const handleKeyEvent = (event: KeyboardEvent, ) => {
-        //need to get the id of content.
+    
+    const handleKeyEvent = ( updatedElement: TextElement, trigger: string ) => {
+        
+        //save content to storage and update store.
+        const updatedData = { [updatedElement.id]: updatedElement }
+        const newDataSet: ContentDataSet = {...contentDataSet, ...updatedData  }
+        saveContentData(newDataSet)
+        setContent(newDataSet);
     }
     
     return (
@@ -44,7 +51,8 @@ export default function WorkspaceArea() {
             const ComponentToRender = COMPONENT_REGISTRY[node.component as keyof typeof COMPONENT_REGISTRY]
             return <ComponentToRender 
                     contentDataSet={contentDataSet}
-                    activeContent={node} 
+                    activeContent={node}
+                    cbKeyEvent={handleKeyEvent} 
                     />
            })}
         </div>

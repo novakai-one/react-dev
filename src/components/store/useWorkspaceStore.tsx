@@ -6,7 +6,8 @@ interface WorkspaceStore {
     setActiveFile: (activeFile: FileData) => void,
     files: FilesDataSet | null,
     content: ContentDataSet | null,
-    setDataSet: (files: FilesDataSet, content: ContentDataSet) => void
+    setDataSet: (files: FilesDataSet, content: ContentDataSet) => void,
+    setContent: (content: ContentDataSet) => void,
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
@@ -14,5 +15,6 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
     setActiveFile: (selectedFile) => set({ activeFile: selectedFile }),
     files: null,
     content: null,
-    setDataSet: (files, content) => set({files, content} )
+    setDataSet: (files, content) => set({files, content} ),
+    setContent: (content) => set({content}) 
 }))

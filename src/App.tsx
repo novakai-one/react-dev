@@ -12,13 +12,17 @@ import { useWorkspaceStore } from './components/store/useWorkspaceStore'
 export default function App() {
   const {saveDocument, loadDocument} = useDocumentStorage();
   const { setActiveFile, setDataSet } = useWorkspaceStore();
+  const ds =  loadDocument()
+  console.log(ds)
   useEffect(() => {
+    if(!ds) return 
+    const {files, content} = ds
     setDataSet(files, content)
   }, [])
 
-  const ds =  loadDocument()
-  if(!ds) return 
-  const {files, content} = ds
+  
+  
+  
   
 
   //boilerplate starting data.

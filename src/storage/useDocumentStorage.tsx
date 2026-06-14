@@ -53,7 +53,31 @@ export function useDocumentStorage() {
         localStorage.removeItem(STORAGE_KEY)
     }, [])
 
-    return {saveDocument, loadDocument, clearDocument}
 
+    const saveContentData = useCallback((
+        content: ContentDataSet
+    ): void => {
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current)
+        }
+        
+        debounceTimer.current = setTimeout(() => {
+            
+            //Get the stored doc to merge new content with existing files.
+            const storedDoc = loadDocument()
+            if(!storedDoc) return
+            const fileData = storedDoc.files;
+
+            try {
+                const doc: DataSet = {content, files: fileData}
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(doc))
+            } catch (err) {
+                console.error("Failed to save the document:", err)
+            }
+        }, DEBOUNCE_MS)
+    }, [])
+
+
+    return {saveDocument, loadDocument, clearDocument, saveContentData}
 }
 

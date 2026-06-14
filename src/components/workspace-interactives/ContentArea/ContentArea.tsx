@@ -1,22 +1,30 @@
 //use markup to fill in content.
 
-import { useRef, type HTMLElementType } from 'react'
+import { useRef, type HTMLElementType, type KeyboardEventHandler } from 'react'
 import './content-area.css'
 import type { ContentDataSet, TextElement } from '../../../types/types'
 
 
 interface ContentAreaProps {
     activeContent: TextElement,
-    contentDataSet: ContentDataSet
+    contentDataSet: ContentDataSet,
+    cbKeyEvent: (updatedElement: TextElement, trigger: string) => void
 }
 
 
-export default function ContentArea( {activeContent, contentDataSet }: ContentAreaProps) {
+export default function ContentArea( {activeContent, contentDataSet, cbKeyEvent }: ContentAreaProps) {
     const {Tag, innerContent, id, classNames, children} = activeContent
+
     
-    const handleKeyEvent = (event: React.KeyboardEvent) => {
-        //on key event update the stored saved data.
-        //give this back to whoever called it.
+    //Pass all events up to workspace -> Leave ContentArea dumb regarding decisions.
+    const handleKeyEvent = (e: React.KeyboardEvent<Element>, trigger: string) => {
+        const target = e.currentTarget as HTMLElement 
+        const updatedElement: TextElement = {
+         ...activeContent, innerContent: target.innerText
+        }
+
+        cbKeyEvent(updatedElement, trigger)
+        
     }
 
     //const contentRef = useRef<HTMLParagraphElement | HTMLHeadingElement | HTMLSpanElement>(null);
@@ -28,14 +36,17 @@ export default function ContentArea( {activeContent, contentDataSet }: ContentAr
             id={id}
             className={classNames}
             contentEditable={true}
-            onKeyUp={handleKeyEvent}
+            onKeyUp={(event) => handleKeyEvent(event, "keyUp")}
+            
             >
                 {innerContent}
                 {children?.map((child) => {
                     const childNode = contentDataSet[child]
                     return <ContentArea 
                         activeContent={childNode}
-                        contentDataSet={contentDataSet} />
+                        contentDataSet={contentDataSet} 
+                        cbKeyEvent={cbKeyEvent}
+                        />
                 })}
             </Tag>
         </div>
