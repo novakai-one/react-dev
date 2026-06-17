@@ -19,6 +19,7 @@ type LayoutData = {
 interface DragContainerProps {
     dragHandleIcon: string, //have a record to extract these from 
     children:  React.ReactNode,//COMPONENT_REGISTRY,
+    testingRef: React.Ref<HTMLDivElement> | null
     id?: number,
     styles?: string,
     draggable?: boolean,
@@ -38,9 +39,13 @@ export default function DragContainer(props: DragContainerProps) {
     //id 
     
     const handleClick = (e: React.MouseEvent) => {
-        console.dir(e)
-        dragRef.current.style.x
-
+        
+        if(!dragRef.current) return
+        console.log(dragRef.current.getBoundingClientRect())
+        let currentX = dragRef.current.style.x;
+        currentX = '200px';
+        console.dir(dragRef.current)
+        dragRef.current.style.left="500px"
     }
 
     

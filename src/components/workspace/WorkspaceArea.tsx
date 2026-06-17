@@ -1,12 +1,13 @@
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import './workspace.css'
-import CanvasArea from '../workspace-interactives/CanvasArea/CanvasArea'
-import ContentArea from '../workspace-interactives/ContentArea/ContentArea'
+import CanvasArea from '../workspace-blocks/CanvasArea/CanvasArea'
+import ContentArea from '../workspace-blocks/ContentArea/ContentArea'
 import type { TextElement, ContentDataSet } from '../../types/types'
 import { useDocumentStorage } from '../../storage/useDocumentStorage'
 import type SelectionManager from '../../selection/selectionManager/SelectionManager'
 import type { MouseEventData } from '../../selection/selectionManager/SelectionManager'
 import DragContainer from '../../draggable/dragContainer/DragContainer'
+import { useRef } from 'react'
 
 
 interface WorkspaceAreaProps {
@@ -28,6 +29,7 @@ function buildRoots(nodes: TextElement[]): TextElement[] {
 export default function WorkspaceArea({ sm }: WorkspaceAreaProps) {
     const { activeFile, content: contentDataSet, setContent } = useWorkspaceStore()
     const { saveContentData } = useDocumentStorage()
+    const testingRef = useRef<HTMLDivElement>(null)
 
     if(!activeFile) return
     if(!contentDataSet) return
@@ -55,13 +57,22 @@ export default function WorkspaceArea({ sm }: WorkspaceAreaProps) {
         console.dir(sm)
     }
 
+    const testingButtonClick = () => {
+        if(!testingRef.current) return
+        console.log(testingRef.current.getBoundingClientRect())
+    }
+
 
     return (
         <div className="workspace-area">
+            <button
+            onClick={testingButtonClick}>CLICK ME :)</button>
             <DragContainer 
+            testingRef={testingRef}
                 dragHandleIcon=". . ."
                 >
-                <p>Drag me</p>
+                <p 
+                >Drag me</p>
             </DragContainer>
             {/* Take the root nodes and turn each of them into a component. */}
             {roots.map((node) => {

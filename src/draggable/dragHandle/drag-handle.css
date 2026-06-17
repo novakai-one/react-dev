@@ -1,3 +1,27 @@
-.drag-handle{
+.drag-handle {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    cursor: grab;
+    opacity: 0.4;
+    flex-shrink: 0;
+}
+
+.drag-handle:hover {
+    opacity: 1;
+}
+
+.drag-handle__dots {
+    display: grid;
+    grid-template-columns: repeat(2, 4px);
+    grid-template-rows: repeat(3, 4px);
+    gap: 3px;
+}
+
+.drag-handle__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: currentColor;
 }

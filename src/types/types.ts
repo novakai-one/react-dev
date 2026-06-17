@@ -1,5 +1,5 @@
-import ContentArea from "../components/workspace-interactives/ContentArea/ContentArea"
-import CanvasArea from "../components/workspace-interactives/CanvasArea/CanvasArea"
+import ContentArea from "../components/workspace-blocks/ContentArea/ContentArea"
+import CanvasArea from "../components/workspace-blocks/CanvasArea/CanvasArea"
 export interface MetaData{
     dateCreated: string,
     author?: string,
