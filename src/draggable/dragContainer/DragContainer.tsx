@@ -7,36 +7,13 @@ Does not control the content layout e.g. columns. This is beyond scope.
 import './drag-container.css'
 import DragHandle from '../dragHandle/DragHandle'
 import {useRef} from 'react'
-import type { COMPONENT_REGISTRY } from '../../types/types'
-//actually might not know its own positioning like this.
-type LayoutData = {
-    x: number,
-    y: number,
-    w: number,
-    h: number
-}
+import type { DragContainerProps } from '../../types/types'
 
-interface DragContainerProps {
-    dragHandleIcon: string, //have a record to extract these from 
-    children:  React.ReactNode,//COMPONENT_REGISTRY,
-    testingRef: React.Ref<HTMLDivElement> | null
-    id?: number,
-    styles?: string,
-    draggable?: boolean,
-    resizable?: boolean,
-    scrollable?: boolean,
-    dragHandlePos?: "N" | "W", //start with 2 options to keep flexbox direction simple.
-}
-
-interface DragContainerPropsxx {
-    
-}
 
 export default function DragContainer(props: DragContainerProps) {
     const dragRef = useRef<HTMLDivElement>(null)
     const { dragHandleIcon, children } = props
-    //container needs x y w h 
-    //id 
+
     
     const handleClick = (e: React.MouseEvent) => {
         

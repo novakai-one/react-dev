@@ -1,0 +1,16 @@
+<mxfile host="65bd71144e">
+    <diagram id="N5_-Eznow01VOBCE5FJ-" name="Page-1">
+        <mxGraphModel dx="1213" dy="785" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="light-dark(#4D4D4D,#121212)" math="0" shadow="0" adaptiveColors="auto">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="WorkspaceArea&lt;div&gt;WS will place containers where they need to be.&amp;nbsp;&lt;br&gt;Question is does DC need to have this? No -&amp;gt; DragManager needs to know this.&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="179" y="209" width="224" height="123" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Drag Container" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="282" y="396" width="224" height="123" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

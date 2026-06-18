@@ -7,8 +7,10 @@ import Header from "./header/Header"
 import Footer from "./footer/Footer"
 import WorkspaceArea from "./workspace/WorkspaceArea"
 import type SelectionManager from "../selection/selectionManager/SelectionManager"
+import type DragManager from "../draggable/dragManager/DragManager"
 interface EditorProps {
-    sm: SelectionManager
+    sm: SelectionManager,
+    dm: DragManager
 }
 export default function Editor ({sm}: EditorProps) {
 
@@ -16,7 +18,10 @@ export default function Editor ({sm}: EditorProps) {
         <div className="editor">           
             
             <Header />
-            <WorkspaceArea sm={sm}/>  
+            <WorkspaceArea 
+                sm={sm}
+                dm={dm}
+                />  
             <Footer />
             
         </div>

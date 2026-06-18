@@ -5,6 +5,7 @@ export interface MetaData{
     author?: string,
     lastEdited?: string
 }
+import './registry'
 
 //layout is temp. Eventually create layoutdata type with x and y  -[]
 //Tag types to add -> search, select, ul, ol, img etc. expand types -[]
@@ -20,7 +21,7 @@ export interface TextElement {
     styles: string,
     classNames: string,
     innerContent: string,
-    layout?: string //create layoutData once relevant.
+    layout?: { layoutData: LayoutData, dragContainerProps: DragContainerProps  } //only optional while its being built. will not be optional ongoing.
     //parent and child 
     parentId: string | null //this would tell me if the next element is a sibling or child.,
     children: string[] | null //TextElement[] | null - 
@@ -72,4 +73,23 @@ export type DataSet = {
 export interface COMPONENT_REGISTRY {
     ContentArea: typeof ContentArea,
     CanvasArea: typeof CanvasArea,
+}
+
+
+export interface LayoutData {
+    x: number,
+    y: number, 
+    w: number,
+    h: number
+}
+
+export interface DragContainerProps {
+    id: number,
+    dragHandleIcon: string, //have a record to extract these from 
+    children:  COMPONENT_REGISTRY,
+    styles: string,
+    draggable: boolean,
+    resizable: boolean,
+    scrollable: boolean,
+    dragHandlePos: "N" | "W", //start with 2 options to keep flexbox direction simple.
 }

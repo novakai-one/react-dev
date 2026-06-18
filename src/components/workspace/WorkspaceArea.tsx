@@ -8,10 +8,12 @@ import type SelectionManager from '../../selection/selectionManager/SelectionMan
 import type { MouseEventData } from '../../selection/selectionManager/SelectionManager'
 import DragContainer from '../../draggable/dragContainer/DragContainer'
 import { useRef } from 'react'
+import DragManager from '../../draggable/dragManager/DragManager'
 
 
 interface WorkspaceAreaProps {
-    sm: SelectionManager
+    sm: SelectionManager,
+    dm: DragManager,
 }
 
 
@@ -26,7 +28,7 @@ function buildRoots(nodes: TextElement[]): TextElement[] {
 }
 
 
-export default function WorkspaceArea({ sm }: WorkspaceAreaProps) {
+export default function WorkspaceArea({ sm, dm }: WorkspaceAreaProps) {
     const { activeFile, content: contentDataSet, setContent } = useWorkspaceStore()
     const { saveContentData } = useDocumentStorage()
     const testingRef = useRef<HTMLDivElement>(null)
@@ -54,8 +56,9 @@ export default function WorkspaceArea({ sm }: WorkspaceAreaProps) {
     //Just forward the raw mouse data + trigger to SM's public method.
     const handleMouseEvent = (mouseData: MouseEventData, trigger: string) => {
         sm.receiveMouseEvent(mouseData, trigger)
-        console.dir(sm)
+        //redirect to the components and classes that should be told.
     }
+    console.dir(sm)
 
     const testingButtonClick = () => {
         if(!testingRef.current) return
@@ -68,7 +71,6 @@ export default function WorkspaceArea({ sm }: WorkspaceAreaProps) {
             <button
             onClick={testingButtonClick}>CLICK ME :)</button>
             <DragContainer 
-            testingRef={testingRef}
                 dragHandleIcon=". . ."
                 >
                 <p 

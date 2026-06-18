@@ -7,6 +7,7 @@ type Position = {
     y: number
 }
 
+//interesting -> x and y will possibly change depending on where this is called.
 type DragBoundaries = {
     minX: number
     minY: number
@@ -16,7 +17,7 @@ type DragBoundaries = {
 
 type OnDropCallback = (id: string, finalPosition: Position) => void
 
-export class DragManager {
+export default class DragManager {
 
     private activeRef: React.RefObject<HTMLDivElement | null> | null = null
     private activeId: string | null = null
