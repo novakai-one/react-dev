@@ -18,9 +18,12 @@
    document's primary surface. caret-color makes the cursor visible against the
    dark canvas. overflow-wrap stops long URLs/tokens blowing out the width. */
 .content-area > [contenteditable="true"] {
-    min-height: 1.6em;
+    /* 26px == one grid row (GRID_UNIT). A one-line block is exactly one cell
+       tall, so block heights are clean grid multiples — CM/LM depend on this.
+       Keep the line-height and grid.ts GRID_UNIT in lockstep. */
+    min-height: 26px;
     outline: none;
-    font: 400 16px/1.65 var(--sans);
+    font: 400 16px/26px var(--sans);
     color: var(--text-secondary);
     letter-spacing: 0.1px;
     caret-color: var(--accent);
@@ -30,12 +33,14 @@
     position: relative;
 }
 
-/* Empty-block placeholder. ContentArea flags emptiness with data-empty="true"
-   (it can't rely on :empty — focusing an empty editable injects a zero-length
-   text node, which defeats :empty). The placeholder text comes from
-   data-placeholder so different block types can hint differently.
-   pointer-events:none keeps clicks landing on the editable, not the hint. */
-.content-area > [contenteditable="true"][data-empty="true"]::before {
+/* Empty-block placeholder. Shows ONLY on the focused empty block (the line your
+   caret is on) — not on every empty block — so a column of fresh blocks doesn't
+   read as a wall of "Write something…". ContentArea flags emptiness with
+   data-empty="true" (it can't rely on :empty — focusing an empty editable
+   injects a zero-length text node, which defeats :empty). The hint text comes
+   from data-placeholder so block types can differ. pointer-events:none keeps
+   clicks landing on the editable, not the hint. */
+.content-area > [contenteditable="true"][data-empty="true"]:focus::before {
     content: attr(data-placeholder);
     color: var(--text);
     opacity: 0.38;

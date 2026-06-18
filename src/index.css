@@ -27,6 +27,12 @@
   --accent-border: rgba(110, 123, 242, 0.5);
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 
+  /* Ruled-grid lines on the workspace. Horizontal rows a touch stronger than
+     the vertical columns (column width is decorative for now). Kept very low
+     so the grid reads as texture, never as a table. */
+  --grid-row:  rgba(255, 255, 255, 0.035);
+  --grid-line: rgba(255, 255, 255, 0.018);
+
   /* Spacing + shape scale — reuse these instead of magic numbers so the whole
      UI shares one rhythm (the thing that reads as "designed"). */
   --r-sm: 6px;

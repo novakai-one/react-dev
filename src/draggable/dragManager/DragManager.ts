@@ -32,6 +32,11 @@ export default class DragManager {
     // endDrag skips onDrop when false — a bare click on the handle is not a drop.
     private hasMoved: boolean = false
 
+    // Horizontal movement is DISABLED for now — blocks are a single column pinned
+    // to PAGE_X (see DragContainer). Dragging only reorders vertically. Flip to
+    // false to re-enable free x once the collision manager + resizing exist.
+    private lockX: boolean = true
+
     // WorkspaceArea hands DM the workspace element ONCE on mount.
     // DM measures it live on every move so scroll/resize never makes it stale.
     private workspaceEl: HTMLElement | null = null
@@ -105,7 +110,13 @@ export default class DragManager {
         localX = Math.max(0, Math.min(localX, ws.width - this.activeEl.offsetWidth))
         localY = Math.max(0, Math.min(localY, ws.height - this.activeEl.offsetHeight))
 
-        this.activeEl.style.left = `${localX}px`
+        // X locked → leave style.left to CSS (PAGE_X) and keep the seeded x in
+        // lastLocal so the drop preserves it. Only top moves.
+        if (!this.lockX) {
+            this.activeEl.style.left = `${localX}px`
+        } else {
+            localX = this.lastLocal.x
+        }
         this.activeEl.style.top = `${localY}px`
 
         this.lastLocal = { x: localX, y: localY }

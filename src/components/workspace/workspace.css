@@ -1,9 +1,18 @@
 .workspace-area {
-    /* A whisper of a radial highlight from the top so the canvas reads as a lit
-       surface rather than a flat void — the kind of depth premium editors use. */
-    background:
-        radial-gradient(120% 60% at 50% -10%, var(--bg-h), transparent 60%),
-        var(--bg);
+    /* Layered background, painted front-to-back:
+       1. Ruled grid — square 26px (GRID_UNIT) cells. Horizontal lines read as
+          ruled-paper rows; vertical lines are fainter (column width doesn't
+          matter yet). Block tops snap to these lines.
+       2. A whisper of a radial highlight from the top so the canvas reads as a
+          lit surface rather than a flat void.
+       The grid layers use background-attachment:local so they scroll WITH the
+       absolutely-positioned blocks and stay aligned; the radial stays put. */
+    background-color: var(--bg);
+    background-image:
+        repeating-linear-gradient(to right,  var(--grid-line) 0 1px, transparent 1px 26px),
+        repeating-linear-gradient(to bottom, var(--grid-row)  0 1px, transparent 1px 26px),
+        radial-gradient(120% 60% at 50% -10%, var(--bg-h), transparent 60%);
+    background-attachment: local, local, scroll;
     flex: 1;
     min-height: 0;
     /* Owns the leftover height between header and footer, and scrolls its own

@@ -265,6 +265,28 @@ export default class SelectionManager {
     }
 
 
+    // Public: focus a block's editable and place caret at the END of its text.
+    // Called by WSA after Backspace deletes an empty block, to land the caret on
+    // the previous block (where the user expects to continue) rather than nowhere.
+    focusBlockEnd = (blockId: string): void => {
+        if (!this._wsaEl) return
+        const editable = findEditableForBlock(blockId, this._wsaEl)
+        if (!editable) return
+
+        editable.focus()
+
+        let textNode = getLastTextNodeForBlock(blockId, this._wsaEl)
+        if (!textNode) {
+            textNode = document.createTextNode('')
+            editable.appendChild(textNode)
+        }
+
+        this._setFocusPoint(textNode, blockId, textNode.length)
+        this.anchor.copyFrom(this.focus)
+        pushCaretToDOM(this.focus)
+    }
+
+
     // ── Caret movement helpers (used by plain Arrow keys) ────────────────
 
     private _moveCaretRight(): void {

@@ -6,7 +6,9 @@
     position: absolute;
     display: flex;
     align-items: flex-start;
-    padding: 2px 4px;
+    /* No vertical padding: a one-line block must be exactly one grid row (26px)
+       tall so heights stay clean grid multiples. Horizontal padding only. */
+    padding: 0 4px;
     border-radius: var(--r-sm);
 
     /* Page-width blocks. left comes inline from the saved x; right is pinned to
@@ -33,7 +35,7 @@
 .drag-container .drag-handle {
     position: absolute;
     left: -22px;
-    top: 2px;
+    top: 0;
 }
 
 /* Reveal the handle only while its own container is hovered — the Notion/Coda

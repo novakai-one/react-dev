@@ -13,6 +13,7 @@ import type {
     TextElement,
 } from '../../../types/types'
 import { layoutKey } from '../../../types/types'
+import { snapToGrid } from '../../../layout/grid'
 import { useWorkspaceStore } from '../../../components/store/useWorkspaceStore'
 import { useLayoutStore } from '../../../layout/useLayoutStore'
 import { useDocumentStorage } from '../../../storage/useDocumentStorage'
@@ -111,7 +112,7 @@ export default function LeftPanel() {
             .map(bid => ls[layoutKey(file.id, bid)])
             .filter((p): p is LayoutItem => Boolean(p))
             .map(p => p.y + p.h)
-        const y = bottoms.length ? Math.max(...bottoms) + NEW_BLOCK_GAP : NEW_BLOCK_TOP
+        const y = snapToGrid(bottoms.length ? Math.max(...bottoms) + NEW_BLOCK_GAP : NEW_BLOCK_TOP)
 
         const newId = crypto.randomUUID()
         const newBlock: TextElement = {

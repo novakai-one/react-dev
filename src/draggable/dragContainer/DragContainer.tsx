@@ -5,6 +5,7 @@
 
 import DragHandle from '../dragHandle/DragHandle'
 import type { DragContainerProps } from '../../types/types'
+import { PAGE_X } from '../../layout/grid'
 import './drag-container.css'
 
 
@@ -15,11 +16,16 @@ export default function DragContainer({
     layoutData,
     isSelected,
 }: DragContainerProps) {
-    // Position comes from saved layout. Inline style owns left/top so it can
-    // update mid-drag without React reconciliation. CSS owns position:absolute.
-    // Fallback 50/50 covers the brief window before a block has a saved layout.
+    // Position comes from saved layout. Inline style owns top so it can update
+    // mid-drag without React reconciliation. CSS owns position:absolute.
+    //
+    // X is DISABLED for now (single-column): every block pins to PAGE_X and the
+    // right gutter in drag-container.css gives the page-width fill. The saved x
+    // is left untouched in the data model — re-enable horizontal movement here
+    // once the collision manager + resizing land. Fallback 50 covers the brief
+    // window before a block has a saved layout.
     const style: React.CSSProperties = {
-        left: layoutData?.x ?? 50,
+        left: PAGE_X,
         top:  layoutData?.y ?? 50,
     }
 
