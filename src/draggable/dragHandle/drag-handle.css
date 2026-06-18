@@ -1,27 +1,46 @@
+/* DragHandle — sits in the left gutter of a block. Hidden by default; the
+   parent .drag-container reveals it on hover (rule lives in drag-container.css).
+   It should read as a quiet affordance, never as chrome competing with text. */
+
 .drag-handle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 10px;
+    /* width frames the dot grid; height matches the body line box so
+       align-items:center lands the dots on the first line of text rather than
+       at the very top of the block. */
+    width: 16px;
+    height: 1.6em;
     cursor: grab;
-    opacity: 0.1;
+    color: var(--text);
+    /* Hidden until the container is hovered (see drag-container.css). Opacity,
+       not display, so the handle keeps its layout slot — text never shifts
+       when it appears or disappears. */
+    opacity: 0;
+    border-radius: var(--r-sm);
+    transition: opacity 140ms var(--ease), background 140ms var(--ease), color 140ms var(--ease);
     flex-shrink: 0;
 }
 
 .drag-handle:hover {
-    opacity: 1;
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }
 
 .drag-handle__dots {
     display: grid;
-    grid-template-columns: repeat(2, 4px);
-    grid-template-rows: repeat(3, 4px);
+    grid-template-columns: repeat(2, 3px);
+    grid-template-rows: repeat(3, 3px);
     gap: 3px;
 }
 
 .drag-handle__dot {
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
     background-color: currentColor;
 }

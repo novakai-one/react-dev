@@ -38,8 +38,9 @@ const NEW_BLOCK_H = 80
 const NEW_BLOCK_X = 50
 const NEW_BLOCK_TOP = 50    // y for the very first block on an empty canvas
 const NEW_BLOCK_GAP = 16
-// Single space so the editable mounts with a caret target (see WorkspaceArea).
-const NEW_BLOCK_CONTENT = " "
+// Empty so the new block shows its placeholder and the caret sits flush left
+// (see WorkspaceArea for why empty is safe).
+const NEW_BLOCK_CONTENT = ""
 
 // File names double as PanelBody keys + click lookups, so a new file needs a
 // name no existing file already uses. "Untitled", then "Untitled 2", "3", …

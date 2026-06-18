@@ -1,7 +1,6 @@
 /* ContentArea — the wrapper around a contentEditable Tag.
    Lives as a flex child of .drag-container. NO margin here: nested ContentAreas
-   would compound it (you'd see ever-growing handle-to-text gaps). The handle-
-   to-content gap is the parent .drag-container's `gap`, not our margin. */
+   would compound it (you'd see ever-growing handle-to-text gaps). */
 
 .content-area {
     flex: 1;
@@ -13,19 +12,46 @@
 /* The editable element itself. min-height keeps empty blocks clickable
    (otherwise an empty <p> collapses to zero height — nowhere to land the caret).
    outline:none removes the browser focus ring; the .is-selected outline on
-   .drag-container is the visible selection cue. */
+   .drag-container is the visible selection cue.
+
+   Body type: a touch larger and looser than UI chrome so prose reads as the
+   document's primary surface. caret-color makes the cursor visible against the
+   dark canvas. overflow-wrap stops long URLs/tokens blowing out the width. */
 .content-area > [contenteditable="true"] {
-    min-height: 1.5em;
+    min-height: 1.6em;
     outline: none;
+    font: 400 16px/1.65 var(--sans);
+    color: var(--text-secondary);
+    letter-spacing: 0.1px;
+    caret-color: var(--accent);
+    overflow-wrap: break-word;
+    word-break: break-word;
+    /* Anchor for the absolutely-positioned empty-block placeholder below. */
+    position: relative;
+}
+
+/* Empty-block placeholder. ContentArea flags emptiness with data-empty="true"
+   (it can't rely on :empty — focusing an empty editable injects a zero-length
+   text node, which defeats :empty). The placeholder text comes from
+   data-placeholder so different block types can hint differently.
+   pointer-events:none keeps clicks landing on the editable, not the hint. */
+.content-area > [contenteditable="true"][data-empty="true"]::before {
+    content: attr(data-placeholder);
+    color: var(--text);
+    opacity: 0.38;
+    pointer-events: none;
+    /* Sits in the text flow but takes no height, so it never nudges the caret. */
+    position: absolute;
+    font-weight: 400;
 }
 
 /* Semantic blocks inserted from the Blocks panel. ContentArea renders the
    chosen tag directly, so these styles are all that distinguish them. Headings
    lean on the editorial --heading serif; blockquote gets the classic rule +
    indent. Margins stay 0 — placement is absolute via the drag container. */
-.content-area > h1[contenteditable="true"] { font: 600 28px/1.25 var(--heading); color: var(--text-h); margin: 0; }
-.content-area > h2[contenteditable="true"] { font: 600 22px/1.3 var(--heading); color: var(--text-h); margin: 0; }
-.content-area > h3[contenteditable="true"] { font: 600 18px/1.35 var(--heading); color: var(--text-h); margin: 0; }
+.content-area > h1[contenteditable="true"] { font: 600 30px/1.2 var(--heading); color: var(--text-h); letter-spacing: -0.02em; margin: 0; }
+.content-area > h2[contenteditable="true"] { font: 600 23px/1.25 var(--heading); color: var(--text-h); letter-spacing: -0.015em; margin: 0; }
+.content-area > h3[contenteditable="true"] { font: 600 18px/1.3 var(--heading); color: var(--text-h); letter-spacing: -0.01em; margin: 0; }
 .content-area > blockquote[contenteditable="true"] {
     margin: 0;
     padding-left: var(--space-3);

@@ -1,18 +1,45 @@
 /* DragContainer — the absolutely-positioned wrapper for a single block.
-   Layout responsibilities only: handle on the left, content fills the rest.
-   Visual/text styling lives on the inner ContentArea Tag. */
+   Layout responsibilities only: content fills the full page width, the handle
+   floats in the left margin. Visual/text styling lives on the inner ContentArea. */
 
 .drag-container {
     position: absolute;
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    padding: 4px 6px;
+    padding: 2px 4px;
+    border-radius: var(--r-sm);
 
-    /* Without min-width an empty block collapses to the handle's 18px and
-       there's nothing horizontal to click. 220px gives a sane default; user
-       drags / resize can grow it. */
-    min-width: 220px;
+    /* Page-width blocks. left comes inline from the saved x; right is pinned to
+       a fixed gutter measured from the workspace's content box. Because the
+       workspace is the positioned ancestor AND it resizes when the settings
+       panel opens/closes or the page-width preset changes, the block's right
+       edge follows automatically — width stays "page width" with zero JS.
+       min-width keeps a sane target if a block is ever pushed far right. */
+    right: 56px;
+    min-width: 180px;
+    transition: background 140ms var(--ease);
+}
+
+/* A whisper of fill on hover so the block reads as an interactive surface and
+   it's obvious which block the handle will grab. Stays well below the selection
+   ring in weight. */
+.drag-container:hover {
+    background: var(--bg-hover);
+}
+
+/* The handle lives in the left margin, out of the text flow, so body text
+   aligns flush to the block's left edge (the Notion/Coda look) and the handle
+   never crowds the text. */
+.drag-container .drag-handle {
+    position: absolute;
+    left: -22px;
+    top: 2px;
+}
+
+/* Reveal the handle only while its own container is hovered — the Notion/Coda
+   pattern. */
+.drag-container:hover .drag-handle {
+    opacity: 0.4;
 }
 
 /* SM-owned block selection ring. SM toggles .is-selected based on its
@@ -20,5 +47,5 @@
 .drag-container.is-selected {
     outline: 2px solid var(--accent-border);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
 }

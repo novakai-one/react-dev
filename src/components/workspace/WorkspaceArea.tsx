@@ -34,10 +34,12 @@ const NEW_BLOCK_DEFAULT_H = 80
 const NEW_BLOCK_DEFAULT_X = 50
 const NEW_BLOCK_VERTICAL_GAP = 16   // pixels between source and new block
 
-// Single space so the editable mounts with a text node (caret target). Pure
-// "" would render a child-less element, defeating min-height and confusing
-// caretPositionFromPoint until focusBlockStart fixes it up.
-const NEW_BLOCK_CONTENT = " "
+// Empty so the block shows its placeholder and the caret sits flush left. A
+// leading space used to push the first character right, then "snap" back as the
+// user typed. Empty is safe: caretPointFromCoordinates (click) and
+// focusBlockStart (Enter) both create a text node on demand, and min-height in
+// content-area.css keeps the empty block clickable.
+const NEW_BLOCK_CONTENT = ""
 
 
 function buildRoots(nodes: TextElement[]): TextElement[] {

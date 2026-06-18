@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type {
     ContentDataSet,
     TextElement,
@@ -7,6 +7,17 @@ import type {
     LifecycleEventData,
 } from '../../../types/types'
 import './content-area.css'
+
+
+// Per-tag hint shown in an empty block so freshly-added blocks are visible and
+// the user knows where to type. Plain <p> gets the generic prompt.
+const PLACEHOLDERS: Record<string, string> = {
+    h1: 'Heading 1',
+    h2: 'Heading 2',
+    h3: 'Heading 3',
+    blockquote: 'Quote',
+    p:  'Write something…',
+}
 
 
 interface ContentAreaProps {
@@ -28,6 +39,13 @@ export default function ContentArea({
     const { Tag, innerContent, id, classNames, children, component } = activeContent
     const contentRef = useRef<HTMLElement>(null)
 
+    // Drives the empty-block placeholder. Tracked in React (not via :empty) because
+    // focusing an empty editable injects a zero-length text node, which would
+    // defeat the :empty selector. Leaf blocks only — a block with nested children
+    // is never "empty".
+    const isLeaf = !children || children.length === 0
+    const [isEmpty, setIsEmpty] = useState(isLeaf && innerContent.trim() === '')
+
     // Seed the editable on mount. innerText (not innerHTML) is mandatory:
     // SM persists via innerText too, so the round-trip stays consistent. Using
     // innerHTML here would render saved <br> tags as literal text on the next
@@ -36,6 +54,14 @@ export default function ContentArea({
         if (!contentRef.current) return
         contentRef.current.innerText = innerContent
     }, [])
+
+    // Keep the placeholder in sync as the user types. textContent (not innerText)
+    // is the cheap read here; we only care whether anything is there.
+    const handleInput = () => {
+        if (!isLeaf) return
+        const text = contentRef.current?.textContent ?? ''
+        setIsEmpty(text.length === 0)
+    }
 
 
     // Mouse, keyboard, lifecycle bodies — built in the body, never inline in
@@ -89,9 +115,12 @@ export default function ContentArea({
                 ref={contentRef as React.Ref<never>}
                 id={id}
                 data-blockid={id}
+                data-empty={isEmpty ? "true" : undefined}
+                data-placeholder={PLACEHOLDERS[Tag as string] ?? PLACEHOLDERS.p}
                 className={classNames}
                 contentEditable={true}
                 suppressContentEditableWarning={true}
+                onInput={handleInput}
                 onMouseDown={(event) => handleMouseEvent(event, "content-area-mouse-down")}
                 onMouseUp={(event)   => handleMouseEvent(event, "content-area-mouse-up")}
                 onClick={(event)     => handleMouseEvent(event, "content-area-click")}
