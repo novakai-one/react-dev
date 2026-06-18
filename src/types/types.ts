@@ -67,7 +67,7 @@ export interface MetaData {
 export interface TextElement {
     id: string,
     component: "ContentArea" | "CanvasArea",
-    Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span" | "ol" | "ul" | "li" | "div",
+    Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span" | "ol" | "ul" | "li" | "div" | "blockquote",
     styles: string,
     classNames: string,
     innerContent: string,
@@ -87,10 +87,20 @@ export interface FilePanelTile {
     panelBody: FileData[],
 }
 
+// A Blocks-tile entry. Clicking one inserts a real TextElement into the active
+// file, rendered by `component` (currently ContentArea) using the semantic `Tag`.
+export interface BlockSpec {
+    id: string,
+    block: string,                              // label shown in the panel
+    component: "ContentArea" | "CanvasArea",
+    Tag: TextElement['Tag'],
+    classNames?: string,
+}
+
 export interface BlockPanelTile {
     type: "blocks",
     tileName: "Blocks",
-    panelBody: { id: string, block: string }[],
+    panelBody: BlockSpec[],
 }
 
 

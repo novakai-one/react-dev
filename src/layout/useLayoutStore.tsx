@@ -17,6 +17,13 @@ import type { PageWidth } from "../types/types"
 interface LayoutStore {
     pageWidth: PageWidth
     setPageWidth: (pageWidth: PageWidth) => void
+    // Sidebar open/closed lives here (not local to each panel) so the header's
+    // always-visible toggles can drive the panels — the Obsidian/Claude pattern
+    // where the collapse control sits in the top bar, not inside the panel.
+    leftPanelOpen: boolean
+    rightPanelOpen: boolean
+    toggleLeftPanel: () => void
+    toggleRightPanel: () => void
 }
 
 export const useLayoutStore = create<LayoutStore>((set) => ({
@@ -24,4 +31,8 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
     // so wide that prose lines get unreadable.
     pageWidth: "normal",
     setPageWidth: (pageWidth) => set({ pageWidth }),
+    leftPanelOpen: true,
+    rightPanelOpen: true,
+    toggleLeftPanel: () => set((s) => ({ leftPanelOpen: !s.leftPanelOpen })),
+    toggleRightPanel: () => set((s) => ({ rightPanelOpen: !s.rightPanelOpen })),
 }))

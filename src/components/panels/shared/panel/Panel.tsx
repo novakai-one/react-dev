@@ -1,20 +1,25 @@
 import { useState } from "react"
 import PanelHeader from "../panel-header/PanelHeader"
 import PanelBody from "../panel-body/PanelBody"
-import PanelToggle from "../panel-toggle/PanelToggle"
 import { useWorkspaceStore } from "../../../store/useWorkspaceStore"
-import type { PanelTile, FileData } from '../../../../types/types'
+import type { PanelTile, FileData, BlockSpec } from '../../../../types/types'
 import './panel.css'
 
 export interface PanelProps {
     cn: string,
     panelData: PanelTile[],
+    // Open/closed is owned by the layout store and passed down — the toggle now
+    // lives in the header, not inside the panel.
+    open: boolean,
     // Optional — when provided AND the Files tile is selected, the panel shows a
-    // "new file" action. Kept optional so the right panel (no files) stays unchanged.
+    // "new file" action. Kept optional so other panels stay unchanged.
     onAddFile?: () => void,
+    // Called when a block is clicked under the Blocks tile — inserts it into the
+    // active file. Provided by LeftPanel.
+    onInsertBlock?: (spec: BlockSpec) => void,
 }
 
-export default function Panel({ cn, panelData, onAddFile }: PanelProps) {
+export default function Panel({ cn, panelData, open, onAddFile, onInsertBlock }: PanelProps) {
 
     const setActiveFile = useWorkspaceStore(s => s.setActiveFile)
 
@@ -22,11 +27,9 @@ export default function Panel({ cn, panelData, onAddFile }: PanelProps) {
 
     // First tile (Files) is selected by default — this is the home view on load.
     const [selectedTile, setSelectedTile] = useState<string>(tileNames[0])
-    const [panelOpen, setPanelOpen] = useState<boolean>(true)
     const [selectedBodyItem, setSelectedBodyItem] = useState<string>("")
 
     const handleTileClicked = (tileName: string) => setSelectedTile(tileName)
-    const handleToggleClick = () => setPanelOpen(prev => !prev)
 
     const selectedPanelTile = panelData.find(item => item.tileName === selectedTile)
     if (!selectedPanelTile) return null
@@ -36,32 +39,28 @@ export default function Panel({ cn, panelData, onAddFile }: PanelProps) {
         ? selectedPanelTile.panelBody.map(f => f.fileName)
         : selectedPanelTile.panelBody.map(b => b.block)
 
-    // Body click — activates a file when the Files tile is current; block tile is read-only for now.
+    // Body click — activates a file (Files tile) or inserts a block (Blocks tile).
     const handleBodyItemClick = (name: string) => {
         setSelectedBodyItem(name)
         if (selectedPanelTile.type === "files") {
             const file: FileData | undefined = selectedPanelTile.panelBody.find(f => f.fileName === name)
             if (file) setActiveFile(file)
+        } else if (selectedPanelTile.type === "blocks") {
+            const spec = selectedPanelTile.panelBody.find(b => b.block === name)
+            if (spec && onInsertBlock) onInsertBlock(spec)
         }
     }
 
     return (
-        <div className={`panel ${cn} panel-open-${panelOpen}`}>
-            <div className="left-panel-header-container">
-                <PanelToggle
-                    cn={cn}
-                    handleClick={handleToggleClick}
-                    panelOpen={panelOpen}
-                />
-                <PanelHeader
-                    cn={cn}
-                    panelOpen={panelOpen}
-                    tileNames={tileNames}
-                    handleTileClicked={handleTileClicked}
-                    selectedTile={selectedTile}
-                />
-            </div>
-            {panelOpen && selectedPanelTile.type === "files" && onAddFile && (
+        <div className={`panel ${cn} panel-open-${open}`}>
+            <PanelHeader
+                cn={cn}
+                panelOpen={open}
+                tileNames={tileNames}
+                handleTileClicked={handleTileClicked}
+                selectedTile={selectedTile}
+            />
+            {open && selectedPanelTile.type === "files" && onAddFile && (
                 <button
                     type="button"
                     className={`${cn} panel-add-file`}

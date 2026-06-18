@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './right-panel.css'
 import { useThemeStore } from '../../../theme/useThemeStore'
 import { useLayoutStore } from '../../../layout/useLayoutStore'
@@ -83,25 +82,13 @@ export default function RightPanel() {
 
     const pageWidth = useLayoutStore(s => s.pageWidth)
     const setPageWidth = useLayoutStore(s => s.setPageWidth)
+    // Open/closed is driven by the header toggle via the layout store.
+    const open = useLayoutStore(s => s.rightPanelOpen)
 
-    const [open, setOpen] = useState(true)
     const activeTheme = getTheme(themeId)
 
     return (
         <aside className={`right-panel rp-open-${open}`}>
-            <button
-                type="button"
-                className="rp-toggle"
-                aria-label={open ? 'Collapse theme panel' : 'Expand theme panel'}
-                aria-expanded={open}
-                onClick={() => setOpen(p => !p)}
-            >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M6 4 L10 8 L6 12" stroke="currentColor" strokeWidth="1.6"
-                        strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            </button>
-
             <div className="rp-content">
                 <header className="rp-head">
                     <div className="rp-head-row">

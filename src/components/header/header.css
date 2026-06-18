@@ -1,13 +1,43 @@
 .header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-2);
     min-height: 44px;
-    padding: 0 var(--space-4);
+    padding: 0 var(--space-2);
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     color: var(--text-secondary);
     font-size: 14px;
+}
+
+/* Left group holds the breadcrumb, right group just the right toggle. Both
+   sidebar toggles live in the bar itself so they stay visible whether or not
+   their panel is open. */
+.header-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background 140ms var(--ease), color 140ms var(--ease);
+}
+
+.sidebar-toggle:hover {
+    color: var(--text-h);
+    background: var(--bg-h);
 }
 
 .header-crumb {
