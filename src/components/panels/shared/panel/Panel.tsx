@@ -9,9 +9,12 @@ import './panel.css'
 export interface PanelProps {
     cn: string,
     panelData: PanelTile[],
+    // Optional — when provided AND the Files tile is selected, the panel shows a
+    // "new file" action. Kept optional so the right panel (no files) stays unchanged.
+    onAddFile?: () => void,
 }
 
-export default function Panel({ cn, panelData }: PanelProps) {
+export default function Panel({ cn, panelData, onAddFile }: PanelProps) {
 
     const setActiveFile = useWorkspaceStore(s => s.setActiveFile)
 
@@ -58,6 +61,16 @@ export default function Panel({ cn, panelData }: PanelProps) {
                     selectedTile={selectedTile}
                 />
             </div>
+            {panelOpen && selectedPanelTile.type === "files" && onAddFile && (
+                <button
+                    type="button"
+                    className={`${cn} panel-add-file`}
+                    onClick={onAddFile}
+                >
+                    <span className="panel-add-file-icon" aria-hidden="true">+</span>
+                    New file
+                </button>
+            )}
             <PanelBody
                 cn={cn}
                 panelSubItem={panelBody}

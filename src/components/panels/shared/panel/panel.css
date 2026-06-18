@@ -14,3 +14,32 @@
     max-width: 0;
     padding-inline: 0;
 }
+
+/* "New file" action — sits between the header and the file list. Only rendered
+   for the Files tile while the panel is open (see Panel.tsx). */
+.panel-add-file {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    margin: 0 0 var(--space-2);
+    padding: 6px 10px;
+    color: var(--text);
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font: 500 13px/1.4 var(--sans);
+    text-align: left;
+    cursor: pointer;
+    transition: color 140ms var(--ease), background 140ms var(--ease);
+}
+
+.panel-add-file:hover {
+    color: var(--text-h);
+    background: var(--bg-hover);
+}
+
+.panel-add-file-icon {
+    font-size: 15px;
+    line-height: 1;
+}

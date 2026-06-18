@@ -25,9 +25,24 @@
     color: var(--text-h);
 }
 
-/* Collapsed: dock the button to the edge and flip the chevron outward. */
+/* Collapsed: the panel itself is max-width:0 + overflow:hidden, so a toggle left
+   in normal flow gets clipped and becomes unclickable. Pin it to the viewport
+   instead (no transformed ancestor, so position:fixed escapes the clip) and give
+   it a surface + shadow so it reads as a floating control over the content. */
 .panel-toggle-open-false {
-    left: 0;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+}
+
+.panel-toggle-open-false:hover {
+    background: var(--bg-h);
+    color: var(--text-h);
 }
 
 .panel-toggle-open-false svg {
