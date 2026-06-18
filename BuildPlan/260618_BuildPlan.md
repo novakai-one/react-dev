@@ -1,3 +1,35 @@
+18th June notes from change:
+
+The three reported bugs and their root causes
+
+Enter caret. Root cause was App.tsx instantiating new SelectionManager() and new DragManager() in the component body, combined with useWorkspaceStore() called without a selector. Together those meant every store change re-rendered App and produced fresh SM/DM instances mid-gesture. The rAF callback from handleNewBlock then ran on an SM whose registered handler had moved on. Fix: useRef for SM/DM (defensive — they're stable for the app's lifetime), and selector-based subscriptions throughout (useWorkspaceStore(s => s.setDataSet) etc.) so App, WSA, and Panel don't re-render on unrelated state. Also switched the focus mechanism away from rAF: WSA now stashes pendingFocusRef.current = newId and a useEffect([sm, activeFile]) flushes it after commit. Parent effects run after child mounts, so ContentArea's innerText seeding has already happened by the time focusBlockStart lands the caret. New blocks now use innerContent: NEW_BLOCK_CONTENT (a single space) so the editable mounts with a real text node — caret has somewhere to live from the first paint, no race.
+Handle-to-text gap. Root cause: .content-area { margin: 30px } plus nested ContentArea components compounding that margin per level. Fix: removed the margin entirely. Horizontal layout now lives on .drag-container (flex with gap: 8px and padding: 4px 6px). ContentArea is flex: 1; min-width: 0; — fills the row, plays nice with overflow. No more compounding when blocks nest.
+Empty block uneditable. Root cause: with content removed, the editable collapsed to zero size — nothing to click. Plus .drag-container had no min-width so the whole row collapsed to the handle. Fix: .drag-container { min-width: 220px }, .content-area > [contenteditable="true"] { min-height: 1.5em; outline: none; }, and new blocks ship with NEW_BLOCK_CONTENT so there's a real text node from mount.
+
+Codebase audit — what else was cleaned up
+Architecture: registry.ts is now the single source of truth for the component map (WSA had its own inline copy, types.ts had a stale COMPONENT_REGISTRY interface, registry.ts existed but was unused — three definitions of the same idea, now one). TextElement.component tightened to "ContentArea" | "CanvasArea" so it can't drift from the registry. The dead sm prop on Panel/LeftPanel is gone. The unused dragHandleIcon, styles, draggable, resizable, scrollable, dragHandlePos fields on DragContainerProps are gone. import './registry' side-effect import from types.ts is gone. Stale PiecesPanelData interface is gone.
+Storage: useDocumentStorage was sharing one debounce timer between saveDocument and saveContentData in a way that worked but was undocumented; now factored through a scheduleWrite helper with a comment explaining the last-write-wins semantics. The saveContentData useCallback now declares loadDocument in its deps.
+Hooks / re-renders: all five consumers of useWorkspaceStore now use selectors. App, WSA, LeftPanel, Panel. No more full-state destructure. App no longer calls loadDocument() in render — moved into the bootstrap useEffect. LeftPanel no longer calls loadDocument() on every render either — pulls files from the store.
+React hygiene: missing key props added to PanelHeader and PanelBody maps. == → === across Panel, PanelHeader, PanelHeaderTile, PanelBody, PanelBodyItem. console.log(selectedTile) deleted from PanelHeader. Stale commented-out code blocks deleted across PanelHeader, PanelBody, panel-body.css.
+CSS cleanup: align-items: stetch → stretch (editor.css). box-shadow: rgba(0.0.0.0.5) (invalid syntax — would silently drop the shadow) → rgba(0, 0, 0, 0.5) (panel.css). color-mix(in srgb, (--accent-border) 100%, transparent) (missing var(), also a no-op color-mix) → var(--accent-border) (panel-header-tile.css). font: 18px 145% var(--mono) (missing slash, invalid font shorthand) → font: 18px/145% var(--mono). border: 1px solid black (hard-coded) → var(--border) (right-panel.css). Duplicate position: relative deduped (panel-toggle.css). Block selection ring moved from index.css to drag-container.css to colocate with the component.
+Two follow-ups worth flagging
+If useEffect([sm, activeFile]) for the pending-focus flush feels too coarse — it'll run on every block move and rename — split it: track a prevActiveFile ref and only fire when the content array length grows. Probably overkill, but if you see weird focus jumps after drag, that's the lever.
+Existing localStorage data persisted with <br> markup will still render literal <br> on first load even after this fix, because the SM _readBlockContent switch from innerHTML to innerText was symmetric with how ContentArea writes back, but old corrupted strings are pre-corruption-cycle. Clearing local storage starts fresh; alternatively, a one-time migration in loadDocument could strip <br> and convert to \n.
+
+
+Outcome: 
+Enter key no longer creates new block -> adds a <br> and enters caret to next line
+Backspace no longer deletes block (may have been broken before latest change.)
+Cross-component seleciton (highlighting) no longer works.
+Rubber band no longer works
+---
+
+
+Gap:
+DragHandle only emits mouse-down. The milestone requirement says "DragHandle must have all event handlers to handle mouse down, mouse up." Mouse-up is currently caught at the workspace level. That's defensible, but note the consequence: if the pointer releases outside .workspace-area, workspace-mouse-up never fires and the drag never ends. A global (document-level) up listener or a handle-level up is needed for robustness
+
+Built:
+18/06/26
 # Drag & Drop — Build Plan v2 (react-dev)
 
 > **One rule, no exceptions:** every mouse event follows ONE path.

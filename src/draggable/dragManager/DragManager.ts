@@ -1,109 +1,139 @@
 // DragManager.ts
-// Responsibilities: owns active drag state, moves dragged container via ref (no re-render during drag)
-// Receives boundaries from WorkspaceArea, passes final position to CollisionManager on drop
+// Responsibilities: owns active drag state and moves the dragged container live.
+// Pure receiver: WorkspaceArea is the ONLY conduit. DM attaches NO listeners of its own.
+// It receives raw mouse events + a trigger and decides what to do based on its OWN state.
+
+import type { MouseEventData } from '../../types/types'
 
 type Position = {
     x: number
     y: number
 }
 
-//interesting -> x and y will possibly change depending on where this is called.
-type DragBoundaries = {
-    minX: number
-    minY: number
-    maxX: number
-    maxY: number
-}
-
 type OnDropCallback = (id: string, finalPosition: Position) => void
 
 export default class DragManager {
 
-    private activeRef: React.RefObject<HTMLDivElement | null> | null = null
+    // DM owns all of its state.
+    private activeEl: HTMLElement | null = null
     private activeId: string | null = null
     private isDragging: boolean = false
 
-    // offset = distance between mouse and top-left corner of container when drag starts
-    // without this, container would snap its top-left corner to the mouse position
+    // offset = distance between mouse and top-left corner of container when drag starts.
+    // without this, the container would snap its top-left corner to the mouse position.
     private mouseOffset: Position = { x: 0, y: 0 }
 
-    private boundaries: DragBoundaries | null = null
+    // last workspace-local position written during the active drag -> handed to onDrop.
+    // Initialized in beginDrag from the container's CURRENT position so a click
+    // without movement preserves the existing layout (was snapping to 0,0).
+    private lastLocal: Position = { x: 0, y: 0 }
+
+    // True once moveActive has applied at least one position update.
+    // endDrag skips onDrop when false — a bare click on the handle is not a drop.
+    private hasMoved: boolean = false
+
+    // WorkspaceArea hands DM the workspace element ONCE on mount.
+    // DM measures it live on every move so scroll/resize never makes it stale.
+    private workspaceEl: HTMLElement | null = null
     private onDrop: OnDropCallback | null = null
 
-    // WorkspaceArea calls this on mount to give DragManager its boundaries
-    setBoundaries(boundaries: DragBoundaries): void {
-        this.boundaries = boundaries
+
+    // WorkspaceArea calls this on mount to give DM the workspace element.
+    setWorkspaceEl = (el: HTMLElement | null): void => {
+        this.workspaceEl = el
     }
 
-    // WorkspaceArea passes its onDrop handler so DragManager can notify it when drag ends
-    setOnDropCallback(callback: OnDropCallback): void {
+
+    // WorkspaceArea passes its drop handler so DM can notify it when a drag ends.
+    setOnDropCallback = (callback: OnDropCallback): void => {
         this.onDrop = callback
     }
 
-    // Called by DragContainer on mousedown via handle callback
-    startDrag(
-        id: string,
-        ref: React.RefObject<HTMLDivElement | null>,
-        event: MouseEvent
-    ): void {
-        if (!ref.current) return
 
-        const rect = ref.current.getBoundingClientRect()
+    // Public entry point -> the ONLY thing WorkspaceArea calls.
+    // Mirrors SelectionManager: one method, trigger string distinguishes the event.
+    receiveMouseEvent = (mouseData: MouseEventData, trigger: string): void => {
+        if(trigger === "drag-handle-mouse-down") this.beginDrag(mouseData)
+        if(trigger === "workspace-mouse-move")   this.moveActive(mouseData)
+        if(trigger === "workspace-mouse-up")     this.endDrag(mouseData)
+    }
 
-        this.activeRef = ref
-        this.activeId = id
-        this.isDragging = true
 
-        // capture how far inside the container the mouse clicked
+    // Find the container under the cursor and capture where inside it the mouse grabbed.
+    private beginDrag = (mouseData: MouseEventData): void => {
+        const target = document.elementFromPoint(mouseData.clientX, mouseData.clientY)
+        const el = target?.closest('.drag-container') as HTMLElement | null
+        if(!el) return
+
+        const rect = el.getBoundingClientRect()
+
+        this.activeEl = el
+        this.activeId = el.id
         this.mouseOffset = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
+            x: mouseData.clientX - rect.left,
+            y: mouseData.clientY - rect.top,
         }
 
-        // attach move + up listeners to window so drag works outside container bounds
-        window.addEventListener('mousemove', this.handleMouseMove)
-        window.addEventListener('mouseup', this.handleMouseUp)
-    }
-
-    // Arrow function so 'this' is always DragManager (not the event target)
-    private handleMouseMove = (event: MouseEvent): void => {
-        if (!this.isDragging || !this.activeRef?.current) return
-
-        let newX = event.clientX - this.mouseOffset.x
-        let newY = event.clientY - this.mouseOffset.y
-
-        // clamp to boundaries if set
-        if (this.boundaries) {
-            const el = this.activeRef.current
-            newX = Math.max(this.boundaries.minX, Math.min(newX, this.boundaries.maxX - el.offsetWidth))
-            newY = Math.max(this.boundaries.minY, Math.min(newY, this.boundaries.maxY - el.offsetHeight))
+        // Seed lastLocal with the container's CURRENT workspace-local position so
+        // a click-without-move doesn't snap to {0,0} on endDrag. workspaceEl is
+        // measured live (matches moveActive) so scroll/resize stays consistent.
+        if (this.workspaceEl) {
+            const ws = this.workspaceEl.getBoundingClientRect()
+            this.lastLocal = { x: rect.left - ws.left, y: rect.top - ws.top }
+        } else {
+            this.lastLocal = { x: rect.left, y: rect.top }
         }
 
-        this.activeRef.current.style.left = `${newX}px`
-        this.activeRef.current.style.top = `${newY}px`
+        this.hasMoved = false
+        this.isDragging = true
     }
 
-    private handleMouseUp = (event: MouseEvent): void => {
-        if (!this.isDragging || !this.activeRef?.current || !this.activeId) return
 
-        const rect = this.activeRef.current.getBoundingClientRect()
-        const finalPosition: Position = { x: rect.left, y: rect.top }
+    // The guard lives here -> DM decides whether a move matters.
+    // Live-measure the workspace every move so the local coords are always correct.
+    private moveActive = (mouseData: MouseEventData): void => {
+        if(!this.isDragging || !this.activeEl || !this.workspaceEl) return
 
-        // notify WorkspaceArea of final position -> WorkspaceArea passes to CollisionManager
-        if (this.onDrop) {
-            this.onDrop(this.activeId, finalPosition)
+        const ws = this.workspaceEl.getBoundingClientRect()
+
+        // .drag-container is absolute inside the relative .workspace-area, so style.left/top
+        // are measured from the workspace, NOT the viewport -> subtract ws.left/ws.top.
+        let localX = mouseData.clientX - this.mouseOffset.x - ws.left
+        let localY = mouseData.clientY - this.mouseOffset.y - ws.top
+
+        // clamp so the container can't be dragged outside the workspace bounds.
+        localX = Math.max(0, Math.min(localX, ws.width - this.activeEl.offsetWidth))
+        localY = Math.max(0, Math.min(localY, ws.height - this.activeEl.offsetHeight))
+
+        this.activeEl.style.left = `${localX}px`
+        this.activeEl.style.top = `${localY}px`
+
+        this.lastLocal = { x: localX, y: localY }
+        this.hasMoved = true
+    }
+
+
+    // Hand the final workspace-local position to WorkspaceArea, then reset.
+    // Only fire onDrop if the user actually moved — a bare click on the handle
+    // is not a layout commit.
+    private endDrag = (_mouseData: MouseEventData): void => {
+        if(!this.isDragging || !this.activeId) return
+
+        if(this.onDrop && this.hasMoved) {
+            this.onDrop(this.activeId, this.lastLocal)
         }
 
         this.cleanup()
     }
 
-    private cleanup(): void {
-        this.activeRef = null
+
+    // Reset state. No listeners to remove -> DM never attached any.
+    private cleanup = (): void => {
+        this.activeEl = null
         this.activeId = null
         this.isDragging = false
+        this.hasMoved = false
         this.mouseOffset = { x: 0, y: 0 }
-
-        window.removeEventListener('mousemove', this.handleMouseMove)
-        window.removeEventListener('mouseup', this.handleMouseUp)
+        this.lastLocal = { x: 0, y: 0 }
     }
 }

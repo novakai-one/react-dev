@@ -1,39 +1,31 @@
 import './left-panel.css'
 import Panel from '../shared/panel/Panel'
-import type { MetaData, FilePanelTile, BlockPanelTile, PanelTile, DataSet } from '../../../types/types'
-import { useDocumentStorage } from '../../../storage/useDocumentStorage'
-import SelectionManager from '../../../selection/selectionManager/SelectionManager'
-interface LeftPanelProps{
-    sm: SelectionManager
+import type { FilePanelTile, BlockPanelTile, PanelTile } from '../../../types/types'
+import { useWorkspaceStore } from '../../../components/store/useWorkspaceStore'
+
+// Hard-coded for now until a real block-type registry exists. Promote to a
+// shared constant or pull from a registry once block-creation flows land.
+const BLOCK_OPTIONS: BlockPanelTile = {
+    type: "blocks",
+    tileName: "Blocks",
+    panelBody: [
+        { id: "block-1", block: "Header" },
+        { id: "block-2", block: "Callout" },
+        { id: "block-3", block: "Quote" },
+    ],
 }
-export default function LeftPanel({sm}: LeftPanelProps) {
-    
-    const cn: string = "left-panel"
-    
-    const storedDataSet = useDocumentStorage().loadDocument() 
-    if(!storedDataSet) return
-    const {files} = storedDataSet //Record<string, FileData | ContentDataSet> -> CDS is TextElements
-    
+
+export default function LeftPanel() {
+    // Subscribe to files via selector so unrelated store updates don't re-render.
+    const files = useWorkspaceStore(s => s.files)
+
     const fileData: FilePanelTile = {
         type: "files",
         tileName: "Files",
-        panelBody: Object.values(files)
+        panelBody: files ? Object.values(files) : [],
     }
 
-    //hard-coded for now until files and fileContents are working
-    const blockOptions: BlockPanelTile = {
-        type: "blocks",
-        tileName: "Blocks",
-        panelBody: [{ id: "block-1", block: "Header" }, { id: "block-2", block: "Callout" }, { id: "block-3", block: "Quote" }]
-    }
+    const panelData: PanelTile[] = [fileData, BLOCK_OPTIONS]
 
-    const leftPanelData: PanelTile[] = [fileData, blockOptions]
-
-    return (
-        <Panel
-            cn={cn}
-            panelData={leftPanelData}
-            sm={sm}
-        />
-    )
+    return <Panel cn="left-panel" panelData={panelData} />
 }

@@ -1,3 +1,20 @@
-.content-area{
-    margin: 30px;
+/* ContentArea — the wrapper around a contentEditable Tag.
+   Lives as a flex child of .drag-container. NO margin here: nested ContentAreas
+   would compound it (you'd see ever-growing handle-to-text gaps). The handle-
+   to-content gap is the parent .drag-container's `gap`, not our margin. */
+
+.content-area {
+    flex: 1;
+    /* flex children with overflowing content need min-width: 0, otherwise
+       long unbroken text expands the container past its allotment. */
+    min-width: 0;
+}
+
+/* The editable element itself. min-height keeps empty blocks clickable
+   (otherwise an empty <p> collapses to zero height — nowhere to land the caret).
+   outline:none removes the browser focus ring; the .is-selected outline on
+   .drag-container is the visible selection cue. */
+.content-area > [contenteditable="true"] {
+    min-height: 1.5em;
+    outline: none;
 }

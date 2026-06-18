@@ -1,7 +1,24 @@
-.drag-container{
+/* DragContainer — the absolutely-positioned wrapper for a single block.
+   Layout responsibilities only: handle on the left, content fills the rest.
+   Visual/text styling lives on the inner ContentArea Tag. */
+
+.drag-container {
     position: absolute;
     display: flex;
-    top: 50px;
-    left: 50px;
-    padding: 50px;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 6px;
+
+    /* Without min-width an empty block collapses to the handle's 18px and
+       there's nothing horizontal to click. 220px gives a sane default; user
+       drags / resize can grow it. */
+    min-width: 220px;
+}
+
+/* SM-owned block selection ring. SM toggles .is-selected based on its
+   _selectedBlockIds set (via useSyncExternalStore in WSA). */
+.drag-container.is-selected {
+    outline: 2px solid var(--accent-border);
+    outline-offset: 2px;
+    border-radius: 4px;
 }

@@ -1,6 +1,6 @@
 
 
-18/06/2026:
+Last Updated 18/06/2026:
 
 
 
@@ -219,6 +219,7 @@ Coding standards:
 
 Next milestones:
 
+Mostly completed 18th June
 1. Operational drag and drop -> main information and features wired (excluding Collision Management)
 
 
@@ -233,3 +234,99 @@ Requirements:
 - TextElement.layout must be coded throughout. All information to be saved into memory along wiht the existing files and Content storage.
 - Workspace Area must send boundaries to drag manager.
 - Top-left positioning determines order that containers are stored in file contents. 
+- Never write inline arrow functions or logic inside the JSX return.
+- Event handler function calls must be handled inside the function body.
+
+2. Migrate working code from pieces (no action now -  wait for build plan)
+
+3. Allow for new Block creation via the BlockCreator -> various methods of creation include copy and paste, left-panel menu tile, and more to come.
+
+4. Allow for new file creation in left-panel menu.
+
+5. Start building database component
+
+```Mermaid
+classDiagram
+    %% ====================================================
+    %% TODO: Replace "TBD" with real responsibilities/state
+    %% ====================================================
+
+    class WorkspaceArea {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class WorkspaceActionRouter {
+        Responsibilities: handles user interactions
+        Memory: TBD
+    }
+
+    class DragContainer {
+        Responsibilities: TBD
+        Memory: layoutData
+        Memory: dragContainerProps
+    }
+
+    class DragHandle {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class DragManager {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class ContentArea {
+        Responsibilities: TBD
+        Memory: TextElement
+    }
+
+    class File {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class Search {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class VersionControl {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class PermissionManager {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class CollisionManager {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class BlockCreator {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class Clipboard {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    class SelectionManager {
+        Responsibilities: TBD
+        Memory: TBD
+    }
+
+    %% ====================================================
+    %% Relationships visible from your Figma diagram
+    %% Add more as you map them out
+    %% ====================================================
+    WorkspaceArea *-- DragContainer
+    WorkspaceArea *-- ContentArea
+    DragContainer *-- ContentArea
+    DragContainer --> DragHandle

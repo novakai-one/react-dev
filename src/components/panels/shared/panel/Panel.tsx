@@ -1,42 +1,39 @@
+import { useState } from "react"
 import PanelHeader from "../panel-header/PanelHeader"
 import PanelBody from "../panel-body/PanelBody"
-import './panel.css'
-import { useState } from "react"
 import PanelToggle from "../panel-toggle/PanelToggle"
 import { useWorkspaceStore } from "../../../store/useWorkspaceStore"
 import type { PanelTile, FileData } from '../../../../types/types'
-import SelectionManager from "../../../../selection/selectionManager/SelectionManager"
+import './panel.css'
 
 export interface PanelProps {
     cn: string,
-    panelData: PanelTile[]
-    sm: SelectionManager
+    panelData: PanelTile[],
 }
 
-export default function Panel({ cn, panelData: pd, sm }: PanelProps) {
+export default function Panel({ cn, panelData }: PanelProps) {
 
-    const { setActiveFile } = useWorkspaceStore()
+    const setActiveFile = useWorkspaceStore(s => s.setActiveFile)
 
-    const tileNames: string[] = pd.map(panel => panel.tileName)
+    const tileNames: string[] = panelData.map(panel => panel.tileName)
 
-    //set first tile option (files) as the selected tile (i.e. this is home page on load)
+    // First tile (Files) is selected by default — this is the home view on load.
     const [selectedTile, setSelectedTile] = useState<string>(tileNames[0])
     const [panelOpen, setPanelOpen] = useState<boolean>(true)
     const [selectedBodyItem, setSelectedBodyItem] = useState<string>("")
 
-    //using names works for now - migrate to ids once that is all set up.
     const handleTileClicked = (tileName: string) => setSelectedTile(tileName)
     const handleToggleClick = () => setPanelOpen(prev => !prev)
 
-    const selectedPanelTile = pd.find(item => item.tileName === selectedTile)
+    const selectedPanelTile = panelData.find(item => item.tileName === selectedTile)
     if (!selectedPanelTile) return null
 
-    // ## The array list of options e.g. list of files or list of block options.
+    // The list of body items rendered under the selected tile (file names or block names).
     const panelBody: string[] = selectedPanelTile.type === "files"
         ? selectedPanelTile.panelBody.map(f => f.fileName)
         : selectedPanelTile.panelBody.map(b => b.block)
 
-    // User selects on one of the menu options e.g. a specific file or a block type.
+    // Body click — activates a file when the Files tile is current; block tile is read-only for now.
     const handleBodyItemClick = (name: string) => {
         setSelectedBodyItem(name)
         if (selectedPanelTile.type === "files") {

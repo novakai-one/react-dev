@@ -1,4 +1,4 @@
-.right-panel{
-    border: 1px solid black;
+.right-panel {
     flex: 1;
+    border: 1px solid var(--border);
 }

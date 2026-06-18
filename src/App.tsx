@@ -1,44 +1,38 @@
+import { useEffect, useRef } from 'react'
 import './App.css'
-import Header from './components/header/Header'
-import Footer from './components/footer/Footer'
 import Editor from './components/Editor'
 import LeftPanel from './components/panels/left-panel/LeftPanel'
 import RightPanel from './components/panels/right-panel/RightPanel'
-import { useEffect } from 'react'
-import type { DataSet, MetaData } from './types/types'
 import { useDocumentStorage } from './storage/useDocumentStorage'
 import { useWorkspaceStore } from './components/store/useWorkspaceStore'
-import { SelectionPoint } from './selection/selectionManager/SelectionManager'
 import SelectionManager from './selection/selectionManager/SelectionManager'
-import { DragManager } from './draggable/dragManager/DragManager'
+import DragManager from './draggable/dragManager/DragManager'
 
+// SM and DM are long-lived stateful objects (anchor/focus, drag state, registered
+// callbacks). They MUST survive across renders or any in-flight gesture is lost.
+// Held in refs so a single instance threads through every child for the app's lifetime.
 export default function App() {
-  const {saveDocument, loadDocument} = useDocumentStorage();
-  const { setActiveFile, setDataSet } = useWorkspaceStore();
-  const ds =  loadDocument()
-  useEffect(() => {
-    if(!ds) return 
-    const {files, content} = ds
-    setDataSet(files, content)
-  }, [])
+    const smRef = useRef<SelectionManager | null>(null)
+    const dmRef = useRef<DragManager | null>(null)
+    if (!smRef.current) smRef.current = new SelectionManager()
+    if (!dmRef.current) dmRef.current = new DragManager()
 
-  
- 
-  
-  const selectionManager = new SelectionManager()
-  const dragManager = new DragManager();
+    // Selectors (not destructure-of-full-state) — otherwise this component
+    // re-renders on every store change, which used to recreate SM/DM mid-gesture.
+    const setDataSet = useWorkspaceStore(s => s.setDataSet)
+    const { loadDocument } = useDocumentStorage()
 
-  return (
-    <div className="app">
-      
-      <LeftPanel sm={selectionManager} />
-      <Editor 
-        sm={selectionManager}
-        dm={dragManager}
-        />
-      <RightPanel />
-      
-    </div>
-   
-  )
+    useEffect(() => {
+        const ds = loadDocument()
+        if (!ds) return
+        setDataSet(ds.files, ds.content)
+    }, [loadDocument, setDataSet])
+
+    return (
+        <div className="app">
+            <LeftPanel />
+            <Editor sm={smRef.current} dm={dmRef.current} />
+            <RightPanel />
+        </div>
+    )
 }

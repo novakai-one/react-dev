@@ -1,39 +1,39 @@
-/*
-responsibilities; Dragging. Resizing. Positioning.
-Does not control the content layout e.g. columns. This is beyond scope.
+// DragContainer — absolutely-positioned wrapper around one block.
+// Owns: position (via inline style from saved layout), the drag handle, and the
+// block-level selection ring (via .is-selected toggled from WSA / SM store).
+// Does NOT own content layout (columns, nesting) — that's the inner ContentArea.
 
-*/
-
-import './drag-container.css'
 import DragHandle from '../dragHandle/DragHandle'
-import {useRef} from 'react'
 import type { DragContainerProps } from '../../types/types'
+import './drag-container.css'
 
 
-export default function DragContainer(props: DragContainerProps) {
-    const dragRef = useRef<HTMLDivElement>(null)
-    const { dragHandleIcon, children } = props
-
-    
-    const handleClick = (e: React.MouseEvent) => {
-        
-        if(!dragRef.current) return
-        console.log(dragRef.current.getBoundingClientRect())
-        let currentX = dragRef.current.style.x;
-        currentX = '200px';
-        console.dir(dragRef.current)
-        dragRef.current.style.left="500px"
+export default function DragContainer({
+    id,
+    children,
+    cbMouseEvent,
+    layoutData,
+    isSelected,
+}: DragContainerProps) {
+    // Position comes from saved layout. Inline style owns left/top so it can
+    // update mid-drag without React reconciliation. CSS owns position:absolute.
+    // Fallback 50/50 covers the brief window before a block has a saved layout.
+    const style: React.CSSProperties = {
+        left: layoutData?.x ?? 50,
+        top:  layoutData?.y ?? 50,
     }
 
-    
+    const className = `drag-container${isSelected ? " is-selected" : ""}`
 
     return (
-        <div className="drag-container" id="1"
-            ref={dragRef}
-            onClick={handleClick}>
-            <DragHandle id="1">
-                {dragHandleIcon}
-            </DragHandle>
+        <div
+            className={className}
+            id={id}
+            data-blockid={id}
+            style={style}
+        >
+            {/* Container hands the conduit straight down — never decides, never wraps. */}
+            <DragHandle id={id} cbMouseEvent={cbMouseEvent} />
             {children}
         </div>
     )

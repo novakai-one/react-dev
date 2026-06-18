@@ -1,22 +1,15 @@
-.panel{
+.panel {
     display: flex;
     flex-direction: column;
     background: var(--surface);
-    
-    backdrop-filter: blur(18px);
-    box-shadow:  3px 0 20px rgba(0.0.0.0.5);
-    
+    color: var(--text-secondary);
     border: 1px solid var(--border);
     padding: 2px;
-    color: var(--text-secondary);
-    
-    
-    /*overflow: hidden;*/
+    backdrop-filter: blur(18px);
+    box-shadow: 3px 0 20px rgba(0, 0, 0, 0.5);
 }
 
-.panel-open-false{
+.panel-open-false {
     max-width: 0;
     box-shadow: none;
-    
 }
-

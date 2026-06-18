@@ -1,7 +1,4 @@
-//editor wraps panels & workspace 
-import Middle from "./workspace/WorkspaceArea"
-import LeftPanel from "./panels/left-panel/LeftPanel"
-import RightPanel from "./panels/right-panel/RightPanel"
+//editor wraps panels & workspace
 import './editor.css'
 import Header from "./header/Header"
 import Footer from "./footer/Footer"
@@ -12,7 +9,7 @@ interface EditorProps {
     sm: SelectionManager,
     dm: DragManager
 }
-export default function Editor ({sm}: EditorProps) {
+export default function Editor ({sm, dm}: EditorProps) {
 
     return(
         <div className="editor">           

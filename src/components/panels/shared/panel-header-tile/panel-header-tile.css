@@ -1,25 +1,18 @@
-
-
 .panel-header-tile {
     border: 2px solid transparent;
-    color: var(--text-secondary);
-    &:hover{
-        border-color: color-mix(in srgb, (--accent-border) 100%, transparent);
-        background: var(--bg-hover);
-        cursor: pointer;
-    };
     border-radius: 4px;
-    font: 18px 145% var(--mono);
-    
+    color: var(--text-secondary);
+    font: 18px/145% var(--mono);
+}
+
+.panel-header-tile:hover {
+    border-color: var(--accent-border);
+    background: var(--bg-hover);
+    cursor: pointer;
 }
 
 .selected-tile {
-    /*background:  rgba(192, 132, 252, 0.081);*/
-    
     font-weight: bold;
-    /*color-mix(in srgb, var(--acent-bg) 70%, transparent 10%);*/
     color: var(--text-h);
     background: var(--bg-h);
-    
-    
 }

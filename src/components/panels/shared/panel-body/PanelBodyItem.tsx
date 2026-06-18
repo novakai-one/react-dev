@@ -1,19 +1,25 @@
 import './panel-body-item.css'
-interface PanelBodyItemProps{
+
+interface PanelBodyItemProps {
     cn: string,
     cn2: number,
     children: string,
     isSelected: boolean,
-    handleClick: (name: string) => void
-}
-export default function PanelBodyItem({cn, cn2, children, isSelected, handleClick: onClickCallback}: PanelBodyItemProps){
-const handleClick = () => {
-    onClickCallback(children)
+    handleClick: (name: string) => void,
 }
 
+export default function PanelBodyItem({
+    cn,
+    cn2,
+    children,
+    isSelected,
+    handleClick,
+}: PanelBodyItemProps) {
     return (
-        <div className={`${cn} panel-body-item-${cn2} ${isSelected?"isSelected":""}`}
-        onClick={handleClick}>
+        <div
+            className={`${cn} panel-body-item-${cn2} ${isSelected ? "isSelected" : ""}`}
+            onClick={() => handleClick(children)}
+        >
             {children}
         </div>
     )

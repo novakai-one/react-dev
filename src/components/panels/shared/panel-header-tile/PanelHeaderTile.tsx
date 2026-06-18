@@ -1,20 +1,18 @@
 import './panel-header-tile.css'
-interface PanelHeaderTileProps{
+
+interface PanelHeaderTileProps {
     cn: string,
     tileName: string,
-    handleClick: (tileName:string) => void
-    isSelected: boolean
+    handleClick: (tileName: string) => void,
+    isSelected: boolean,
 }
-export default function PanelHeaderTile({cn, tileName, handleClick, isSelected}: PanelHeaderTileProps){
 
-    const tileClicked = () => {
-        handleClick(tileName)
-    }
-    const selected: string = isSelected == true ? "selected-tile" : "";
-
+export default function PanelHeaderTile({ cn, tileName, handleClick, isSelected }: PanelHeaderTileProps) {
     return (
-        <div className={`${cn} panel-header-tile ${selected}`}
-        onClick={tileClicked}>
+        <div
+            className={`${cn} panel-header-tile ${isSelected ? "selected-tile" : ""}`}
+            onClick={() => handleClick(tileName)}
+        >
             {tileName}
         </div>
     )

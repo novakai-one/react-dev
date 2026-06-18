@@ -1,48 +1,85 @@
 import { useEffect, useRef } from 'react'
+import type {
+    ContentDataSet,
+    TextElement,
+    MouseEventData,
+    KeyEventData,
+    LifecycleEventData,
+} from '../../../types/types'
 import './content-area.css'
-import type { ContentDataSet, TextElement } from '../../../types/types'
-import type { MouseEventData } from '../../../selection/selectionManager/SelectionManager'
 
 
 interface ContentAreaProps {
     activeContent: TextElement,
     contentDataSet: ContentDataSet,
-    cbKeyEvent: (updatedElement: TextElement, trigger: string) => void,
-    cbMouseEvent: (mouseData: MouseEventData, trigger: string) => void,
+    cbMouseEvent:     (mouseData: MouseEventData, trigger: string) => void,
+    cbKeyboardEvent:  (keyData: KeyEventData, trigger: string) => void,
+    cbLifecycleEvent: (lifecycleData: LifecycleEventData, trigger: string) => void,
 }
 
 
-export default function ContentArea({ activeContent, contentDataSet, cbKeyEvent, cbMouseEvent }: ContentAreaProps) {
+export default function ContentArea({
+    activeContent,
+    contentDataSet,
+    cbMouseEvent,
+    cbKeyboardEvent,
+    cbLifecycleEvent,
+}: ContentAreaProps) {
     const { Tag, innerContent, id, classNames, children, component } = activeContent
     const contentRef = useRef<HTMLElement>(null)
 
+    // Seed the editable on mount. innerText (not innerHTML) is mandatory:
+    // SM persists via innerText too, so the round-trip stays consistent. Using
+    // innerHTML here would render saved <br> tags as literal text on the next
+    // mount. See SelectionManager._readBlockContent for the symmetric read.
     useEffect(() => {
-        if(!contentRef.current) return
+        if (!contentRef.current) return
         contentRef.current.innerText = innerContent
     }, [])
 
 
-    //Pass events up to workspace -> CA stays dumb. No decisions, no construction.
-    const handleKeyEvent = (e: React.KeyboardEvent<Element>, trigger: string) => {
-        const target = e.currentTarget as HTMLElement
-        const updatedElement: TextElement = {
-            ...activeContent, innerContent: target.innerText
-        }
-        cbKeyEvent(updatedElement, trigger)
-    }
-
-
-    //Hand up raw mouse coords + own identity (id, component type). 
-    //SM will do caretPositionFromPoint + childNode indexing once it has this.
-    //One mouse callback, trigger string distinguishes the event -> mirrors key event shape.
+    // Mouse, keyboard, lifecycle bodies — built in the body, never inline in
+    // JSX. ContentArea stays dumb: it just shapes the payload and forwards.
+    // SM owns every decision (and every preventDefault).
     const handleMouseEvent = (e: React.MouseEvent, trigger: string) => {
         const mouseData: MouseEventData = {
-            clientX: e.clientX,
-            clientY: e.clientY,
-            blockId: id,
+            clientX:  e.clientX,
+            clientY:  e.clientY,
+            blockId:  id,
             blockType: component,
+            shiftKey: e.shiftKey,
+            metaKey:  e.metaKey,
+            ctrlKey:  e.ctrlKey,
+            altKey:   e.altKey,
+            button:   e.button,
+            buttons:  e.buttons,
         }
         cbMouseEvent(mouseData, trigger)
+    }
+
+    const handleKeyboardEvent = (e: React.KeyboardEvent, trigger: string) => {
+        // nativeEvent is the live React event — SM owns preventDefault, so the
+        // chain CA → WSA → SM must stay synchronous (no setTimeout / Promise.then).
+        const keyData: KeyEventData = {
+            key:       e.key,
+            shiftKey:  e.shiftKey,
+            metaKey:   e.metaKey,
+            ctrlKey:   e.ctrlKey,
+            altKey:    e.altKey,
+            blockId:   id,
+            blockType: component,
+            nativeEvent: e,
+        }
+        cbKeyboardEvent(keyData, trigger)
+    }
+
+    const handleLifecycleEvent = (trigger: string) => {
+        // Lifecycle events carry no DOM event reference — SM reads the live DOM itself.
+        const lifecycleData: LifecycleEventData = {
+            blockId:   id,
+            blockType: component,
+        }
+        cbLifecycleEvent(lifecycleData, trigger)
     }
 
 
@@ -51,20 +88,29 @@ export default function ContentArea({ activeContent, contentDataSet, cbKeyEvent,
             <Tag
                 ref={contentRef as React.Ref<never>}
                 id={id}
+                data-blockid={id}
                 className={classNames}
                 contentEditable={true}
-                onKeyUp={(event) => handleKeyEvent(event, "keyUp")}
-                onClick={(event) => handleMouseEvent(event, "click")}
-                
+                suppressContentEditableWarning={true}
+                onMouseDown={(event) => handleMouseEvent(event, "content-area-mouse-down")}
+                onMouseUp={(event)   => handleMouseEvent(event, "content-area-mouse-up")}
+                onClick={(event)     => handleMouseEvent(event, "content-area-click")}
+                onKeyDown={(event)   => handleKeyboardEvent(event, "keydown")}
+                onKeyUp={(event)     => handleKeyboardEvent(event, "keyup")}
+                onBlur={()           => handleLifecycleEvent("content-area-blur")}
             >
                 {children?.map((child) => {
                     const childNode = contentDataSet[child]
-                    return <ContentArea
-                        activeContent={childNode}
-                        contentDataSet={contentDataSet}
-                        cbKeyEvent={cbKeyEvent}
-                        cbMouseEvent={cbMouseEvent}
-                    />
+                    return (
+                        <ContentArea
+                            key={child}
+                            activeContent={childNode}
+                            contentDataSet={contentDataSet}
+                            cbMouseEvent={cbMouseEvent}
+                            cbKeyboardEvent={cbKeyboardEvent}
+                            cbLifecycleEvent={cbLifecycleEvent}
+                        />
+                    )
                 })}
             </Tag>
         </div>

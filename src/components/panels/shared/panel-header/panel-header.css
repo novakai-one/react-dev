@@ -1,23 +1,18 @@
 .panel-header {
-    min-height: 20px;
-    max-height: 80px;
-    /*border: 1px solid var(--accent-border);*/
     display: flex;
     flex: 1;
     align-items: center;
+    min-height: 20px;
+    max-height: 80px;
     margin: 10px 10px 20px 10px;
-    margin-bottom: 20px;
+    padding: 2px;
     overflow: hidden;
     background: var(--surface-secondary);
-    padding: 2px;
-    
     border: 1px solid var(--border);
     border-radius: 5px;
-
 }
 
-.panel-open-false .panel-header{
-    border: 0px;
-    
-    padding: 0px;
+.panel-open-false .panel-header {
+    border: 0;
+    padding: 0;
 }
