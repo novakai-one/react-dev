@@ -12,6 +12,7 @@ import { snapToGrid } from './grid'
 import { resolveFileCollisions, orderByPosition } from '../components/workspace/workspaceLayout'
 
 
+//Not good design -> collapse after deeath should go through the normal key event handler.
 /**
  * After a block at `deletedY` (height `deletedH`) is removed, raise every block
  * below it by the vacated height + the gap that sat beneath it, so the doc
@@ -19,6 +20,7 @@ import { resolveFileCollisions, orderByPosition } from '../components/workspace/
  *
  * `items` is the REMAINING placements for one file (the deleted one already
  * dropped). Only blocks strictly below the deleted top move.
+ * 
  */
 export function collapseAfterDelete(
     items: LayoutItem[],

@@ -184,8 +184,10 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
 
     const handleMouseEvent = useCallback(
         (data: MouseEventData, trigger: string) => route('mouse', data, trigger), [route])
+
     const handleKeyEvent = useCallback(
         (data: KeyEventData, trigger: string) => route('key', data, trigger), [route])
+        
     const handleLifecycleEvent = useCallback(
         (data: LifecycleEventData, trigger: string) => route('lifecycle', data, trigger), [route])
 
