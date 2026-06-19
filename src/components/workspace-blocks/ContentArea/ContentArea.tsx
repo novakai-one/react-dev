@@ -103,13 +103,13 @@ export default function ContentArea({
         console.log(trigger) //to get around Supabase error
         // Lifecycle events carry no DOM event reference — SM reads th
         // e live DOM itself.
-        /* commented out 19th June to see if anything breaks. Seems unnecessary
+         //commented out 19th June to see if anything breaks. Seems unnecessary
         const lifecycleData: LifecycleEventData = {
             blockId:   id,
             blockType: component,
         }
         cbLifecycleEvent(lifecycleData, trigger)
-        */
+        
     }
 
 
