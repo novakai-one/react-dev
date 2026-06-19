@@ -13,7 +13,7 @@ import type {
 import { layoutKey } from '../../types/types'
 import type SelectionManager from '../../selection/selectionManager/SelectionManager'
 import type DragManager from '../../draggable/dragManager/DragManager'
-import type BlockManager from '../workspace-blocks/blocks/blockManager'
+import type BlockManager from '../workspace-blocks/blockCreator/blockManager'
 import type LayoutManager from '../../layout/layoutManager'
 import DragContainer from '../../draggable/dragContainer/DragContainer'
 import WorkspaceEmptyState from './WorkspaceEmptyState'

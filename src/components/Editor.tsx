@@ -5,7 +5,7 @@ import Footer from "./footer/Footer"
 import WorkspaceArea from "./workspace/WorkspaceArea"
 import type SelectionManager from "../selection/selectionManager/SelectionManager"
 import type DragManager from "../draggable/dragManager/DragManager"
-import type BlockManager from "./workspace-blocks/blocks/blockManager"
+import type BlockManager from "./workspace-blocks/blockCreator/blockManager"
 import type LayoutManager from "../layout/layoutManager"
 interface EditorProps {
     sm: SelectionManager,

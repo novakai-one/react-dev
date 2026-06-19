@@ -11,7 +11,7 @@ import { useAuthStore } from './auth/useAuthStore'
 import Login from './auth/Login'
 import SelectionManager from './selection/selectionManager/SelectionManager'
 import DragManager from './draggable/dragManager/DragManager'
-import BlockManager from './components/workspace-blocks/blocks/blockManager'
+import BlockManager from './components/workspace-blocks/blockCreator/blockManager'
 import LayoutManager from './layout/layoutManager'
 import DesignDemo from './design-demo/DesignDemo' // ── DEMO TOGGLE: delete this line + the block below + the design-demo folder to remove ──
 

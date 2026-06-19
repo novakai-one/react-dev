@@ -101,11 +101,13 @@ export default function ContentArea({
 
     const handleLifecycleEvent = (trigger: string) => {
         // Lifecycle events carry no DOM event reference — SM reads the live DOM itself.
+        /* commented out 19th June to see if anything breaks. Seems unnecessary
         const lifecycleData: LifecycleEventData = {
             blockId:   id,
             blockType: component,
         }
         cbLifecycleEvent(lifecycleData, trigger)
+        */
     }
 
 
