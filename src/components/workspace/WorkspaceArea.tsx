@@ -158,13 +158,16 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
         dm.setOnDropCallback((id, finalLocal) => {
             const state = useWorkspaceStore.getState()
             if (!state.activeFile || !state.content) return
+
             const moved = movePlacement(
                 { file: state.activeFile, contentData: state.content, layoutData: state.layouts ?? {} },
                 state.activeFile.id, id, finalLocal,
             )
+
             const tidied = lm.receiveMouseEvent(
                 { ...EMPTY_MOUSE, blockId: state.activeFile.id }, "workspace-click", moved,
             )
+            
             commit(tidied)
         })
     }, [dm, lm, commit])
