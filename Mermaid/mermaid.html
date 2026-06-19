@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowmap — drag-and-drop mermaid</title>
+<style>
+  :root {
+    --bg: #11131a;
+    --panel: #181b24;
+    --panel-2: #1f2330;
+    --line: #2b3040;
+    --ink: #e6e8ee;
+    --ink-dim: #8b93a7;
+    --accent: #6ee7c7;
+    --accent-2: #f2a65a;
+    --node: #232838;
+    --node-stroke: #3a4257;
+    --sel: #6ee7c7;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  /* ---- top bar ---- */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: 15px;
+  }
+  .brand span { color: var(--accent); }
+  .bar-group { display: flex; gap: 6px; align-items: center; }
+  .bar-sep { width: 1px; height: 22px; background: var(--line); }
+  button.tool, .filebtn {
+    background: var(--panel-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 11px;
+    font-size: 12.5px;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+    white-space: nowrap;
+  }
+  button.tool:hover, .filebtn:hover { border-color: var(--accent); }
+  button.tool.active { border-color: var(--accent); background: #1c2630; color: var(--accent); }
+  .hint { color: var(--ink-dim); font-size: 11.5px; margin-left: auto; font-family: var(--mono); }
+
+  /* ---- body layout ---- */
+  main { display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+
+  /* ---- canvas ---- */
+  .stage { position: relative; overflow: hidden; background:
+    radial-gradient(circle at 1px 1px, #20242f 1px, transparent 0) 0 0 / 24px 24px,
+    var(--bg);
+  }
+  svg.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .node {
+    position: absolute;
+    min-width: 96px;
+    min-height: 44px;
+    background: var(--node);
+    border: 1.5px solid var(--node-stroke);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: grab;
+    user-select: none;
+    border-radius: 8px;
+  }
+  .node.shape-cylinder { border-radius: 8px / 22px; }
+  .node.shape-diamond {
+    border-radius: 4px;
+    transform: rotate(45deg);
+  }
+  .node.shape-diamond .label { transform: rotate(-45deg); }
+  .node.shape-subgraph {
+    background: rgba(110,231,199,0.04);
+    border-style: dashed;
+    align-items: flex-start;
+    min-width: 200px;
+    min-height: 140px;
+    padding: 8px 12px;
+    cursor: grab;
+  }
+  .node.shape-subgraph .label { font-size: 11.5px; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+  .node.selected { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel), 0 6px 22px rgba(0,0,0,.4); }
+  .node.linksrc { border-color: var(--accent-2); box-shadow: 0 0 0 1px var(--accent-2); }
+  .port {
+    position: absolute;
+    right: -7px; top: 50%;
+    width: 14px; height: 14px;
+    margin-top: -7px;
+    background: var(--accent-2);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+    cursor: crosshair;
+    opacity: 0;
+    transition: opacity .12s;
+  }
+  .node:hover .port, .node.selected .port { opacity: 1; }
+  .node.shape-diamond .port { transform: rotate(-45deg); }
+
+  /* edge labels live in HTML over the svg */
+  .edgelabel {
+    position: absolute;
+    background: var(--bg);
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .edgelabel:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ---- right panel ---- */
+  aside { background: var(--panel); border-left: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
+  .ptab { display: flex; border-bottom: 1px solid var(--line); }
+  .ptab button {
+    flex: 1; background: none; border: none; color: var(--ink-dim);
+    padding: 11px; font-size: 12px; cursor: pointer; font-family: var(--mono);
+    border-bottom: 2px solid transparent;
+  }
+  .ptab button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .ppane { overflow: auto; min-height: 0; }
+  textarea#mmd {
+    width: 100%; height: 100%; resize: none; border: none;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    padding: 14px; outline: none;
+  }
+  .panel-foot { padding: 10px 14px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+  .panel-foot button { flex: 1; }
+
+  /* inspector */
+  .insp { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+  .insp .empty { color: var(--ink-dim); font-size: 12.5px; font-family: var(--mono); }
+  .field label { display: block; font-size: 11px; color: var(--ink-dim); margin-bottom: 5px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+  .field input, .field select {
+    width: 100%; background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
+    font-size: 13px; font-family: var(--sans); outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .swatches { display: flex; gap: 7px; }
+  .sw { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
+  .sw.on { border-color: var(--ink); }
+  .danger { background: #2a1a1c !important; border-color: #5a2a2e !important; color: #f0a0a0 !important; }
+  kbd { font-family: var(--mono); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">flow<span>map</span></div>
+  <div class="bar-group" id="shapeTools">
+    <button class="tool" data-shape="rect">▭ Box</button>
+    <button class="tool" data-shape="round">⬭ Process</button>
+    <button class="tool" data-shape="cylinder">⛁ Store</button>
+    <button class="tool" data-shape="diamond">◇ Decision</button>
+    <button class="tool" data-shape="subgraph">⬚ Group</button>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-group">
+    <button class="tool" id="linkBtn">↳ Link</button>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-group">
+    <button class="filebtn" id="saveBtn">Save</button>
+    <label class="filebtn" for="loadInput">Load</label>
+    <input id="loadInput" type="file" accept=".mmd,.txt" hidden>
+  </div>
+  <div class="hint" id="hint">Click a shape to drop it · drag to move · double-click to rename</div>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <svg class="wires" id="wires"></svg>
+  </div>
+
+  <aside>
+    <div class="ptab">
+      <button id="tabMmd" class="active">mermaid</button>
+      <button id="tabInsp">inspector</button>
+    </div>
+    <div class="ppane" id="paneMmd">
+      <textarea id="mmd" spellcheck="false"></textarea>
+    </div>
+    <div class="ppane insp" id="paneInsp" style="display:none">
+      <div class="empty" id="inspEmpty">Select a node or edge.</div>
+      <div id="inspBody" style="display:none; flex-direction:column; gap:14px;"></div>
+    </div>
+    <div class="panel-foot">
+      <button class="filebtn" id="applyMmd">Apply text → canvas</button>
+      <button class="filebtn" id="copyMmd">Copy</button>
+    </div>
+  </aside>
+</main>
+
+<script>
+/* ============================================================
+   MODEL  — one object both views read and write
+   nodes: id -> {id,label,shape,color,x,y,w,h}
+   edges: [{id,from,to,label,style}]
+   ============================================================ */
+const state = { nodes: {}, edges: [], sel: null, selKind: null };
+let nid = 1, eid = 1;
+const SHAPES = ['rect','round','cylinder','diamond','subgraph'];
+const STYLES = { solid:'-->', dotted:'-.->', thick:'==>' };
+const PALETTE = ['#232838','#2a3a44','#3a2e2a','#2e3a2a','#382a3a'];
+
+const stage = document.getElementById('stage');
+const wires = document.getElementById('wires');
+const mmd   = document.getElementById('mmd');
+
+/* ---------- node creation ---------- */
+function addNode(shape, x, y) {
+  const id = 'n' + (nid++);
+  const big = shape === 'subgraph';
+  state.nodes[id] = {
+    id, label: defaultLabel(shape), shape,
+    color: PALETTE[0],
+    x: x ?? 80 + Object.keys(state.nodes).length * 30 % 300,
+    y: y ?? 80 + Object.keys(state.nodes).length * 24 % 240,
+    w: big ? 220 : 0, h: big ? 150 : 0
+  };
+  render(); sync();
+  select(id, 'node');
+}
+function defaultLabel(s){
+  return ({rect:'Module',round:'Process',cylinder:'Store',diamond:'Decision?',subgraph:'Group'})[s];
+}
+
+/* ---------- render canvas from model ---------- */
+function render() {
+  // nodes
+  [...stage.querySelectorAll('.node,.edgelabel')].forEach(e=>e.remove());
+  for (const id in state.nodes) {
+    const n = state.nodes[id];
+    const el = document.createElement('div');
+    el.className = 'node shape-' + n.shape + (state.sel===id&&state.selKind==='node'?' selected':'') + (linkSrc===id?' linksrc':'');
+    el.dataset.id = id;
+    el.style.left = n.x + 'px';
+    el.style.top  = n.y + 'px';
+    if (n.w) el.style.width  = n.w + 'px';
+    if (n.h) el.style.height = n.h + 'px';
+    if (n.color && n.shape!=='subgraph') el.style.background = n.color;
+    el.innerHTML = `<span class="label">${esc(n.label)}</span><div class="port" data-port="${id}"></div>`;
+    stage.appendChild(el);
+  }
+  drawWires();
+}
+
+function nodeCenter(n){ const el=stage.querySelector(`.node[data-id="${n.id}"]`); const w=el?el.offsetWidth:120, h=el?el.offsetHeight:44; return {cx:n.x+w/2, cy:n.y+h/2, w, h}; }
+
+function drawWires(){
+  wires.innerHTML = `<defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6b7488"/>
+    </marker></defs>`;
+  for (const e of state.edges){
+    const a = state.nodes[e.from], b = state.nodes[e.to];
+    if(!a||!b) continue;
+    const A = nodeCenter(a), B = nodeCenter(b);
+    const p = edgePoint(A,B), q = edgePoint(B,A);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    const dash = e.style==='dotted'?'5 5':'0';
+    const wd = e.style==='thick'?3:1.6;
+    path.setAttribute('d', `M ${p.x} ${p.y} L ${q.x} ${q.y}`);
+    path.setAttribute('stroke', state.sel===e.id&&state.selKind==='edge' ? 'var(--sel)' : '#6b7488');
+    path.setAttribute('stroke-width', wd);
+    path.setAttribute('stroke-dasharray', dash);
+    path.setAttribute('fill','none');
+    path.setAttribute('marker-end','url(#arrow)');
+    wires.appendChild(path);
+    // label
+    if (e.label){
+      const lab=document.createElement('div');
+      lab.className='edgelabel'; lab.dataset.eid=e.id; lab.textContent=e.label;
+      lab.style.left=((p.x+q.x)/2)+'px'; lab.style.top=((p.y+q.y)/2)+'px';
+      stage.appendChild(lab);
+    }
+  }
+}
+// intersection of line center->other with box edge
+function edgePoint(from,to){
+  const dx=to.cx-from.cx, dy=to.cy-from.cy;
+  if(dx===0&&dy===0) return {x:from.cx,y:from.cy};
+  const hw=from.w/2, hh=from.h/2;
+  const sx=dx!==0?hw/Math.abs(dx):Infinity, sy=dy!==0?hh/Math.abs(dy):Infinity;
+  const s=Math.min(sx,sy);
+  return {x:from.cx+dx*s, y:from.cy+dy*s};
+}
+
+function esc(s){ return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+/* ============================================================
+   SELECTION + INSPECTOR
+   ============================================================ */
+function select(id, kind){
+  state.sel=id; state.selKind=kind; render(); renderInspector();
+  if(id){ showTab('insp'); }
+}
+function renderInspector(){
+  const empty=document.getElementById('inspEmpty'), body=document.getElementById('inspBody');
+  if(!state.sel){ empty.style.display='block'; body.style.display='none'; return; }
+  empty.style.display='none'; body.style.display='flex';
+  if(state.selKind==='node'){
+    const n=state.nodes[state.sel];
+    body.innerHTML = `
+      <div class="field"><label>Label</label><input id="iLabel" value="${esc(n.label)}"></div>
+      <div class="field"><label>Shape</label><select id="iShape">${SHAPES.map(s=>`<option ${s===n.shape?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Colour</label><div class="swatches">${PALETTE.map(c=>`<div class="sw ${c===n.color?'on':''}" data-c="${c}" style="background:${c}"></div>`).join('')}</div></div>
+      <button class="filebtn danger" id="iDel">Delete node</button>`;
+    document.getElementById('iLabel').oninput=e=>{n.label=e.target.value; render(); sync();};
+    document.getElementById('iShape').onchange=e=>{n.shape=e.target.value; if(n.shape==='subgraph'&&!n.w){n.w=220;n.h=150;} render(); sync(); renderInspector();};
+    body.querySelectorAll('.sw').forEach(sw=>sw.onclick=()=>{n.color=sw.dataset.c; render(); sync(); renderInspector();});
+    document.getElementById('iDel').onclick=()=>delNode(n.id);
+  } else {
+    const e=state.edges.find(x=>x.id===state.sel);
+    body.innerHTML = `
+      <div class="field"><label>Edge label</label><input id="eLabel" value="${esc(e.label||'')}" placeholder="writes / reads / fires"></div>
+      <div class="field"><label>Line style</label><select id="eStyle">${Object.keys(STYLES).map(s=>`<option ${s===e.style?'selected':''}>${s}</option>`).join('')}</select></div>
+      <button class="filebtn danger" id="eDel">Delete edge</button>`;
+    document.getElementById('eLabel').oninput=ev=>{e.label=ev.target.value; render(); sync();};
+    document.getElementById('eStyle').onchange=ev=>{e.style=ev.target.value; render(); sync();};
+    document.getElementById('eDel').onclick=()=>{state.edges=state.edges.filter(x=>x.id!==e.id); select(null); sync();};
+  }
+}
+function delNode(id){
+  delete state.nodes[id];
+  state.edges=state.edges.filter(e=>e.from!==id&&e.to!==id);
+  select(null); sync();
+}
+
+/* ============================================================
+   DRAG  (move nodes)  +  LINK (port drag)  +  resize subgraph
+   ============================================================ */
+let drag=null, linkSrc=null, linkMode=false, ghost=null;
+
+stage.addEventListener('pointerdown', e=>{
+  const port=e.target.closest('.port');
+  const node=e.target.closest('.node');
+  const elab=e.target.closest('.edgelabel');
+  if(elab){ select(elab.dataset.eid,'edge'); return; }
+  if(port){ startLink(port.dataset.port, e); return; }
+  if(node){
+    const id=node.dataset.id;
+    if(linkMode){ if(linkSrc&&linkSrc!==id){ makeEdge(linkSrc,id); linkSrc=null; setLinkMode(false);} else { linkSrc=id; render(); } return; }
+    select(id,'node');
+    const n=state.nodes[id];
+    drag={id, dx:e.clientX-stage.getBoundingClientRect().left-n.x, dy:e.clientY-stage.getBoundingClientRect().top-n.y};
+    node.setPointerCapture(e.pointerId);
+  } else {
+    if(!linkMode) select(null);
+  }
+});
+stage.addEventListener('pointermove', e=>{
+  const r=stage.getBoundingClientRect();
+  if(drag){
+    const n=state.nodes[drag.id];
+    n.x=Math.max(0, e.clientX-r.left-drag.dx);
+    n.y=Math.max(0, e.clientY-r.top-drag.dy);
+    render();
+  }
+  if(linkSrc&&ghost){
+    const a=state.nodes[linkSrc], A=nodeCenter(a), p=A;
+    ghost.setAttribute('d',`M ${p.cx} ${p.cy} L ${e.clientX-r.left} ${e.clientY-r.top}`);
+  }
+});
+stage.addEventListener('pointerup', e=>{
+  if(drag){ drag=null; sync(); }
+  if(ghost){
+    const tgt=e.target.closest('.node');
+    if(tgt&&linkSrc&&tgt.dataset.id!==linkSrc) makeEdge(linkSrc,tgt.dataset.id);
+    ghost.remove(); ghost=null; linkSrc=null; render();
+  }
+});
+function startLink(srcId,e){
+  linkSrc=srcId;
+  ghost=document.createElementNS('http://www.w3.org/2000/svg','path');
+  ghost.setAttribute('stroke','var(--accent-2)'); ghost.setAttribute('stroke-width','2'); ghost.setAttribute('stroke-dasharray','4 4'); ghost.setAttribute('fill','none');
+  wires.appendChild(ghost);
+}
+function makeEdge(from,to){
+  if(state.edges.some(e=>e.from===from&&e.to===to)) return;
+  state.edges.push({id:'e'+(eid++), from, to, label:'', style:'solid'});
+  render(); sync();
+}
+function setLinkMode(on){ linkMode=on; linkSrc=on?linkSrc:null; document.getElementById('linkBtn').classList.toggle('active',on); render(); }
+
+/* double-click rename inline */
+stage.addEventListener('dblclick', e=>{
+  const node=e.target.closest('.node'); if(!node) return;
+  const n=state.nodes[node.dataset.id];
+  const v=prompt('Label:', n.label); if(v!==null){ n.label=v; render(); sync(); renderInspector(); }
+});
+
+/* keyboard delete */
+window.addEventListener('keydown', e=>{
+  if((e.key==='Delete'||e.key==='Backspace') && state.sel && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){
+    if(state.selKind==='node') delNode(state.sel);
+    else { state.edges=state.edges.filter(x=>x.id!==state.sel); select(null); sync(); }
+  }
+});
+
+/* ============================================================
+   MERMAID  <->  MODEL
+   model -> text  (with layout metadata in %% comments)
+   ============================================================ */
+const shapeWrap = {
+  rect:    (id,l)=>`${id}["${l}"]`,
+  round:   (id,l)=>`${id}("${l}")`,
+  cylinder:(id,l)=>`${id}[("${l}")]`,
+  diamond: (id,l)=>`${id}{"${l}"}`,
+  subgraph:(id,l)=>`subgraph ${id} ["${l}"]\n  end`
+};
+function toMermaid(){
+  let out='flowchart TD\n';
+  // layout metadata, ignored by real mermaid renderers
+  for(const id in state.nodes){ const n=state.nodes[id];
+    out+=`%% pos ${id} ${Math.round(n.x)} ${Math.round(n.y)} ${Math.round(n.w)} ${Math.round(n.h)} ${n.shape} ${n.color}\n`;
+  }
+  for(const id in state.nodes){ const n=state.nodes[id];
+    out+='  '+shapeWrap[n.shape](id, n.label.replace(/"/g,"'"))+'\n';
+  }
+  for(const e of state.edges){
+    const arrow=STYLES[e.style]||'-->';
+    const lbl=e.label? (e.style==='dotted'?`-.->|${e.label}|`:e.style==='thick'?`==>|${e.label}|`:`-->|${e.label}|`) : arrow;
+    out+=`  ${e.from} ${lbl} ${e.to}\n`;
+  }
+  return out;
+}
+function sync(){ mmd.value=toMermaid(); }
+
+/* text -> model */
+function fromMermaid(text){
+  const nodes={}, edges=[], meta={};
+  let maxN=0,maxE=0;
+  text.split('\n').forEach(line=>{
+    const t=line.trim();
+    let m;
+    if((m=t.match(/^%% pos (\w+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) (\w+) (#?\w+)/))){
+      meta[m[1]]={x:+m[2],y:+m[3],w:+m[4],h:+m[5],shape:m[6],color:m[7]};
+      const num=+m[1].replace(/\D/g,''); if(num>maxN)maxN=num;
+      return;
+    }
+    if(t.startsWith('%%')||t.startsWith('flowchart')||t.startsWith('graph')||t==='end') return;
+
+    // node defs
+    let nm;
+    if((nm=t.match(/^subgraph\s+(\w+)\s*\["?([^"\]]*)"?\]/))){ ensure(nm[1],nm[2],'subgraph'); return; }
+    if((nm=t.match(/^(\w+)\[\("?([^"\)]*)"?\)\]/))){ ensure(nm[1],nm[2],'cylinder'); return; }
+    if((nm=t.match(/^(\w+)\{"?([^"\}]*)"?\}/))){ ensure(nm[1],nm[2],'diamond'); return; }
+    if((nm=t.match(/^(\w+)\("?([^"\)]*)"?\)/))){ ensure(nm[1],nm[2],'round'); return; }
+    if((nm=t.match(/^(\w+)\["?([^"\]]*)"?\]/))){ ensure(nm[1],nm[2],'rect'); return; }
+
+    // edges:  A --> B   |  A -->|lbl| B  | -.-> | ==>
+    let em=t.match(/^(\w+)\s*(-\.->|==>|-->|---)\s*(?:\|([^|]*)\|)?\s*(\w+)/);
+    if(em){
+      ensure(em[1]); ensure(em[4]);
+      const style = em[2]==='-.->'?'dotted':em[2]==='==>'?'thick':'solid';
+      edges.push({id:'e'+(++maxE), from:em[1], to:em[4], label:(em[3]||'').trim(), style});
+    }
+  });
+
+  function ensure(id,label,shape){
+    const num=+id.replace(/\D/g,''); if(num>maxN)maxN=num;
+    if(!nodes[id]) nodes[id]={id,label:label??id,shape:shape??'rect',color:PALETTE[0],x:0,y:0,w:0,h:0};
+    else if(label) { nodes[id].label=label; if(shape) nodes[id].shape=shape; }
+  }
+
+  // apply metadata; auto-layout anything without it
+  let auto=0;
+  for(const id in nodes){
+    const n=nodes[id], md=meta[id];
+    if(md){ n.x=md.x;n.y=md.y;n.w=md.w;n.h=md.h;n.shape=md.shape;n.color=md.color; }
+    else { n.x=80+(auto%4)*200; n.y=80+Math.floor(auto/4)*130; auto++; if(n.shape==='subgraph'){n.w=220;n.h=150;} }
+  }
+  return {nodes, edges, nextN:maxN+1, nextE:maxE+1};
+}
+
+function applyText(){
+  try{
+    const r=fromMermaid(mmd.value);
+    state.nodes=r.nodes; state.edges=r.edges; nid=r.nextN; eid=r.nextE;
+    select(null); render(); sync();
+  }catch(err){ alert('Could not parse that mermaid: '+err.message); }
+}
+
+/* ============================================================
+   WIRING  buttons / tabs / files
+   ============================================================ */
+document.querySelectorAll('#shapeTools .tool').forEach(b=>{
+  b.onclick=()=>{ setLinkMode(false); addNode(b.dataset.shape); };
+});
+document.getElementById('linkBtn').onclick=()=>setLinkMode(!linkMode);
+document.getElementById('applyMmd').onclick=applyText;
+document.getElementById('copyMmd').onclick=()=>{ navigator.clipboard.writeText(mmd.value); flash('Copied'); };
+document.getElementById('saveBtn').onclick=()=>{
+  const blob=new Blob([mmd.value],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='diagram.mmd'; a.click();
+};
+document.getElementById('loadInput').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=()=>{ mmd.value=rd.result; applyText(); }; rd.readAsText(f);
+  e.target.value='';
+};
+
+/* tabs */
+function showTab(which){
+  const m=which==='mmd';
+  document.getElementById('tabMmd').classList.toggle('active',m);
+  document.getElementById('tabInsp').classList.toggle('active',!m);
+  document.getElementById('paneMmd').style.display=m?'block':'none';
+  document.getElementById('paneInsp').style.display=m?'none':'flex';
+}
+document.getElementById('tabMmd').onclick=()=>showTab('mmd');
+document.getElementById('tabInsp').onclick=()=>showTab('insp');
+
+function flash(msg){ const h=document.getElementById('hint'); const old=h.textContent; h.textContent=msg; setTimeout(()=>h.textContent=old,1200); }
+
+/* ---------- seed example ---------- */
+state.nodes={
+  n1:{id:'n1',label:'Page',shape:'rect',color:PALETTE[0],x:90,y:70,w:0,h:0},
+  n2:{id:'n2',label:'SelectionManager',shape:'round',color:PALETTE[1],x:330,y:70,w:0,h:0},
+  n3:{id:'n3',label:'Workspace store',shape:'cylinder',color:PALETTE[2],x:330,y:230,w:0,h:0},
+  n4:{id:'n4',label:'Has selection?',shape:'diamond',color:PALETTE[4],x:110,y:230,w:0,h:0},
+};
+state.edges=[
+  {id:'e1',from:'n1',to:'n2',label:'fires event',style:'dotted'},
+  {id:'e2',from:'n2',to:'n3',label:'writes',style:'solid'},
+  {id:'e3',from:'n1',to:'n3',label:'reads',style:'solid'},
+  {id:'e4',from:'n2',to:'n4',label:'',style:'solid'},
+];
+nid=5; eid=5;
+render(); sync(); showTab('mmd');
+window.addEventListener('resize', drawWires);
+</script>
+</body>
+</html>
