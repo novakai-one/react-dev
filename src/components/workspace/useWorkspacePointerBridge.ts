@@ -22,6 +22,7 @@ type ForwardMouse = (data: MouseEventData, trigger: string) => void
 
 export function useWorkspacePointerBridge(forward: ForwardMouse): void {
     useEffect(() => {
+        //20th June 
         const onMouseMove = (e: MouseEvent) => forward(mouseEventDataFrom(e), "workspace-mouse-move")
         const onMouseUp   = (e: MouseEvent) => forward(mouseEventDataFrom(e), "workspace-mouse-up")
 
@@ -49,5 +50,6 @@ export function mouseEventDataFrom(e: MouseEvent | React.MouseEvent): MouseEvent
         altKey:   e.altKey,
         button:   e.button,
         buttons:  e.buttons,
+        nativeEvent: e,
     }
 }

@@ -18,14 +18,15 @@ import type { ReactNode } from "react"
 export type MouseEventData = {
     clientX: number,
     clientY: number,
-    blockId: string,
-    blockType: string,
+    blockId: string, // simpler to make this an extension of Lifecycle and send these two up each time.
+    blockType: string, //this should be updated to actual type for component_registry
     shiftKey: boolean,
     metaKey: boolean,
     ctrlKey: boolean,
     altKey: boolean,
     button: number,
     buttons: number,
+    nativeEvent: React.MouseEvent | MouseEvent | null, // MouseEvent for native addEventListener
 }
 
 export type KeyEventData = {

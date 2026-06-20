@@ -187,7 +187,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
 
     const handleKeyEvent = useCallback(
         (data: KeyEventData, trigger: string) => route('key', data, trigger), [route])
-        
+
     const handleLifecycleEvent = useCallback(
         (data: LifecycleEventData, trigger: string) => route('lifecycle', data, trigger), [route])
 
@@ -252,7 +252,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
 const EMPTY_MOUSE: MouseEventData = {
     clientX: 0, clientY: 0, blockId: "", blockType: "",
     shiftKey: false, metaKey: false, ctrlKey: false, altKey: false,
-    button: 0, buttons: 0,
+    button: 0, buttons: 0, nativeEvent: null
 }
 
 

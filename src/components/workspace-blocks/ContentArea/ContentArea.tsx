@@ -79,6 +79,7 @@ export default function ContentArea({
             altKey:   e.altKey,
             button:   e.button,
             buttons:  e.buttons,
+            nativeEvent: e,
         }
         cbMouseEvent(mouseData, trigger)
     }

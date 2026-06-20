@@ -146,6 +146,7 @@ function mouseDataFrom(e: React.MouseEvent, blockId: string): MouseEventData {
         altKey:   e.altKey,
         button:   e.button,
         buttons:  e.buttons,
+        nativeEvent: e
     }
 }
 
