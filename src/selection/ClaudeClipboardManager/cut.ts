@@ -1,28 +1,66 @@
-import type { DocShape } from "../../types/types"
+import type {
+    DocShape,
+    ContentDataSet,
+    LayoutDataSet,
+    DatabaseDataSet,
+} from "../../types/types"
+import { layoutKey, databaseKey } from "../../types/types"
+import type { SelectionPoint } from "../ClaudeSelectionManager/selectionState"
 import { clipboardStore } from "./clipboardStore"
-import { buildSlice, readSelection } from "./copy"
+import { buildSlice } from "./copy"
 import { resolveSelectedIds } from "./selectionRange"
 
 // ── cut ───────────────────────────────────────────────────────────────────
-// Same as copy, except mode is "cut" and the selected ids are recorded as the
-// source set to delete. Whether the source blocks are removed NOW or on the next
-// paste is a PLACEHOLDER decision (PLAN.md item 5).
+// Copy the selection into the buffer (mode "cut", same ids recorded as sourceIds),
+// THEN remove the source blocks from the document and return the new shape.
 //
-// Current behaviour: cut does NOT mutate the document here. It records the
-// ordered ids (also used as sourceIds) and mode "cut". Deletion is deferred.
-// This keeps cut+escape non-destructive — nothing lost if paste never happens.
+// Cut MUTATES (unlike copy): the block disappears immediately (scenario 2). On the
+// later paste, mode "cut" makes paste keep the SAME ids — the block is the same
+// block, relocated. Because the source is gone now, re-adding the id on paste does
+// not collide.
 //
-// Deleting a block also needs its layout + content-order entry pulled and the
-// hole closed. That is LayoutManager's job, so cut should likely SIGNAL the
-// delete rather than perform it. Confirm the boundary before wiring deletion.
+// Removal is in lockstep across all three datasets, the same invariant paste honours:
+//   contentData   — the TextElement record
+//   layoutData    — its LayoutItem (keyed fileId:blockId)
+//   file.content  — the ordered id array
+//   databaseData  — the DatabaseConfiguration, if the block was a DatabaseArea
+// Clipboard does NOT signal LayoutManager (that would breach the shape->shape
+// contract). It returns the new shape; LM closes the resulting hole on its own pass,
+// relying on file.content staying correctly ordered (which a filter preserves).
 
-export function cut(eventData: unknown, shape: DocShape): DocShape {
-    const ids = resolveSelectedIds(readSelection(eventData), shape)
-    if (ids.length === 0) return shape
+// Fills the buffer, removes the source, returns the new shape. Always a fresh shape
+// (matches the always-new-shape contract) — a clone when there is nothing to cut.
+export function cut(range: SelectionPoint[], shape: DocShape): DocShape {
+    const ids = resolveSelectedIds(range, shape)
+    if (ids.length === 0) return { ...shape } // nothing selected — fresh identity
 
     const { slice, orderedIds } = buildSlice(ids, shape)
     clipboardStore.hold(slice, "cut", orderedIds, orderedIds)
 
-    // PLACEHOLDER: returning shape unchanged — deletion deferred.
-    return shape
+    return removeBlocks(orderedIds, shape)
+}
+
+// Remove `ids` from contentData + layoutData + databaseData + file.content, all
+// shallow-copied first so the input shape is never mutated. Returns the new shape.
+function removeBlocks(ids: string[], shape: DocShape): DocShape {
+    const fileId = shape.file?.id ?? ""
+    const drop = new Set(ids)
+
+    const contentData:  ContentDataSet  = { ...shape.contentData }
+    const layoutData:   LayoutDataSet   = { ...shape.layoutData }
+    const databaseData: DatabaseDataSet = { ...shape.databaseData }
+
+    for (const id of ids) {
+        delete contentData[id]
+        delete layoutData[layoutKey(fileId, id)]
+        delete databaseData[databaseKey(id)] // identity key; harmless if not a db block
+    }
+
+    // Close the id out of the ordered content array. filter preserves order.
+    let file = shape.file
+    if (file) {
+        file = { ...file, content: file.content.filter(id => !drop.has(id)) }
+    }
+
+    return { file, contentData, layoutData, databaseData }
 }

@@ -6,32 +6,28 @@ import type {
     LayoutItem,
 } from "../../types/types"
 import { layoutKey, databaseKey } from "../../types/types"
-import type { SelectionState } from "../ClaudeSelectionManager/selectionState"
+import type { SelectionPoint } from "../ClaudeSelectionManager/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { resolveSelectedIds } from "./selectionRange"
 
+// Selection comes from SM as a `range` (SelectionPoint[]) passed into receiveEvent,
+// NOT from the key event — KeyEventData carries one blockId, not the multi-block
+// selection. SM's buildRange produces the range; clipboard resolves it to ordered ids.
+
 // ── copy ──────────────────────────────────────────────────────────────────
 // Build a DocShape slice from the selected blocks and put it in the buffer.
-// Returns shape UNCHANGED — copy never mutates the document.
+// Returns void — copy never mutates the document. ClipboardManager owns the
+// (always-new) shape return.
 //
 // Steps (runtime order):
-//   1. Resolve the SelectionState into an ordered id list (selectionRange).
+//   1. Resolve the range (SelectionPoint[]) into an ordered id list (selectionRange).
 //   2. For each id, IN ORDER: pull its TextElement from shape.contentData.
 //   3. Pull that block's LayoutItem from shape.layoutData (keyed fileId:blockId).
 //   4. If the block is a DatabaseArea: pull its DatabaseConfiguration too.
 //   5. hold the slice + the ordered id list in the buffer, mode "copy".
-//   6. return shape (unchanged).
 //
 // The ORDERED id list is held alongside the slice. Datasets are unordered
 // Records; paste needs the document order to re-emit blocks correctly for LM.
-
-// Where the selection comes from. SM passes its SelectionState. PLACEHOLDER
-// field name (`selection`) until the SM-side eventData shape is confirmed — the
-// resolver itself is final.
-function readSelection(eventData: unknown): SelectionState | null {
-    const e = eventData as { selection?: SelectionState }
-    return e?.selection ?? null
-}
 
 // Shared slice builder — cut.ts reuses this. Pulls the records for `ids` (already
 // ordered) out of `shape`. Does NOT touch the buffer or the shape. Returns both
@@ -69,15 +65,12 @@ export function buildSlice(
     return { slice: { contentData, layoutData, databaseData }, orderedIds: kept }
 }
 
-export function copy(eventData: unknown, shape: DocShape): DocShape {
-    const ids = resolveSelectedIds(readSelection(eventData), shape)
-    if (ids.length === 0) return shape
+// Fills the buffer from the SM-built range. Returns nothing — copy never touches
+// the document. ClipboardManager owns the (always-new) shape return.
+export function copy(range: SelectionPoint[], shape: DocShape): void {
+    const ids = resolveSelectedIds(range, shape)
+    if (ids.length === 0) return
 
     const { slice, orderedIds } = buildSlice(ids, shape)
     clipboardStore.hold(slice, "copy", orderedIds, [])
-
-    return shape
 }
-
-// Exported for cut.ts to reuse the selection reader.
-export { readSelection }

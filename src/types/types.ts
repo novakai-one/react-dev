@@ -119,7 +119,7 @@ export interface MetaData {
 // children: a flat list of child block ids — supports future nesting; currently null.
 // Position/size now live in LayoutItem (see Layout section), not on the block.
 export interface TextElement {
-    id: string,
+    id: string, // a.k.a. blockId
     component: "ContentArea" | "CanvasArea" | "DatabaseArea",
     Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span" | "ol" | "ul" | "li" | "div" | "blockquote",
     styles: string,

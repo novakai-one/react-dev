@@ -10,18 +10,28 @@ import { layoutKey, databaseKey } from "../../types/types"
 import type { ClipboardSlice } from "./clipboardStore"
 
 // ── ids ───────────────────────────────────────────────────────────────────
-// Give every pasted block a NEW id so a paste never collides with the source
-// block (paste-in-place would otherwise overwrite the original).
+// Re-key a slice for paste into `fileId`, returning the slice + an old->new idMap.
+//
+// TWO MODES, driven by `preserveIds`:
+//   COPY (preserveIds false, default) — mint a NEW id for every block. Paste is a
+//     fresh block that never collides with the source. (Scenarios 1 & 3: copy →
+//     new block id; source stays put.)
+//   CUT  (preserveIds true) — KEEP every id. The pasted block IS the source block,
+//     moved to a new place/file. idMap is identity. Layout is still re-keyed to the
+//     target fileId so the SAME block id lands on the new canvas. (Scenario 2: cut
+//     → same block id, relocated.) NOTE: cut MUST remove the source first, or the
+//     same id ends up in content twice — see cut deletion (PLAN.md, coupled).
 //
 // Returns:
 //   slice  — the same three datasets, re-keyed and with rewritten id fields.
-//   idMap  — old id -> new id, so callers can remap references that point at
-//            these blocks (children[], database cell ids) in a later pass.
+//   idMap  — old id -> new id (identity in cut mode), for remapping references that
+//            point at these blocks (children[], database cell ids) in a later pass.
 //
-// PLACEHOLDER id generator. Replace with the project's real id factory (whatever
-// blockManager / the store uses) so pasted ids match the existing scheme.
+// Project id factory: raw crypto.randomUUID(), matching blockManager.ts and
+// databaseFactory.ts (no prefix), so pasted ids are indistinguishable from blocks
+// created any other way.
 function newId(): string {
-    return `blk_${Math.random().toString(36).slice(2, 10)}`
+    return crypto.randomUUID()
 }
 
 export interface RegenResult {
@@ -29,13 +39,23 @@ export interface RegenResult {
     idMap: Record<string, string>,
 }
 
-export function regenerateIds(slice: ClipboardSlice, fileId: string): RegenResult {
+export interface RegenOptions {
+    // CUT keeps ids (same block moved); COPY (default) mints new ones.
+    preserveIds?: boolean,
+}
+
+export function regenerateIds(
+    slice: ClipboardSlice,
+    fileId: string,
+    opts: RegenOptions = {},
+): RegenResult {
+    const preserveIds = opts.preserveIds ?? false
     const idMap: Record<string, string> = {}
 
-    // 1. Mint a new id for every content block first, so later passes can look
-    //    references up in idMap.
+    // 1. Decide the new id for every content block first, so later passes can look
+    //    references up in idMap. CUT: identity (same id). COPY: a fresh id.
     for (const oldId of Object.keys(slice.contentData)) {
-        idMap[oldId] = newId()
+        idMap[oldId] = preserveIds ? oldId : newId()
     }
 
     // 2. Rebuild contentData under the new ids, rewriting the block's own id.
