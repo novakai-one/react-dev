@@ -66,7 +66,7 @@ export default class LayoutManager {
 
         const layoutData = resolveFileCollisions(fileId, orderedIds, shape.layoutData, movedId)
         const content = orderByPosition(orderedIds, fileId, layoutData, 0)
-        return { file: { ...shape.file, content }, contentData: shape.contentData, layoutData, databaseData: shape.databaseData }
+        return { ...shape, file: { ...shape.file, content }, layoutData }
     }
 
     // The block at the greatest y — the one BlockManager most likely just placed.

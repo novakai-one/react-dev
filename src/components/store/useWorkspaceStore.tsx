@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import type { FileData, FilesDataSet, ContentDataSet, LayoutDataSet, DatabaseDataSet } from '../../types/types'
+import type { FileData, FilesDataSet, ContentDataSet, LayoutDataSet, DatabaseDataSet, SelectionSnapshot } from '../../types/types'
+import { emptySelectionSnapshot } from '../../types/types'
 
 // Which block to put the caret in after a structural change has rendered.
 // BlockManager sets it; WSA reads it once in a post-render effect and clears it.
@@ -23,6 +24,11 @@ interface WorkspaceStore {
     setContent: (content: ContentDataSet) => void,
     setLayouts: (layouts: LayoutDataSet) => void,
     setDatabases: (databases: DatabaseDataSet) => void,
+    // The selection result SM writes into the committed shape: which whole
+    // blocks are highlighted + the caret target. Read by WSA to flag each
+    // DragContainer, replacing the old SM subscription store.
+    selection: SelectionSnapshot,
+    setSelection: (selection: SelectionSnapshot) => void,
     // Caret target after a create/delete commits (see PendingFocus).
     pendingFocus: PendingFocus,
     setPendingFocus: (pendingFocus: PendingFocus) => void,
@@ -39,6 +45,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
     setContent: (content) => set({ content }),
     setLayouts: (layouts) => set({ layouts }),
     setDatabases: (databases) => set({ databases }),
+    selection: emptySelectionSnapshot(),
+    setSelection: (selection) => set({ selection }),
     pendingFocus: null,
     setPendingFocus: (pendingFocus) => set({ pendingFocus }),
 }))

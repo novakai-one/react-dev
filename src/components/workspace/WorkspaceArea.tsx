@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import { useDocumentStorage } from '../../storage/useDocumentStorage'
 import { COMPONENT_REGISTRY, type ComponentRegistryKey } from '../../types/registry'
@@ -44,9 +44,10 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     const { saveDocument } = useDocumentStorage()
     const wsaRef = useRef<HTMLDivElement>(null)
 
-    // Which blocks are selected. SM owns selection, so WSA subscribes to SM's
-    // block-selection store and passes the flag down to each DragContainer.
-    const selectedBlockIds = useSyncExternalStore(sm.subscribe, sm.getSelectedIds)
+    // Which blocks are selected. SM writes the selection snapshot into the
+    // committed shape; WSA reads the block-id list straight off the store and
+    // passes the flag down to each DragContainer. No SM subscription.
+    const selectedBlockIds = useWorkspaceStore(s => s.selection.selectedBlockIds)
 
 
     // ── Commit: write the shape back, let React diff ─────────────────────────
@@ -55,15 +56,27 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     const commit = useCallback((shape: DocShape): void => {
         const state = useWorkspaceStore.getState()
         if (!shape.file || !state.files) return
-        if (
+
+        const docUnchanged =
             shape.contentData === state.content &&
             shape.layoutData === state.layouts &&
             shape.databaseData === state.databases
-        ) return
+        const selectionUnchanged = shape.selection === state.selection
+
+        // Nothing moved at all — no document edit and no selection change. Skip.
+        if (docUnchanged && selectionUnchanged) return
+
+        // Selection-only change (e.g. a caret move): write just the snapshot so
+        // WSA's selected-block flags update without a document write.
+        if (docUnchanged) {
+            state.setSelection(shape.selection)
+            return
+        }
 
         const updatedFiles: FilesDataSet = { ...state.files, [shape.file.id]: shape.file }
         saveDocument(updatedFiles, shape.contentData, shape.layoutData, shape.databaseData)
         setDataSet(updatedFiles, shape.contentData, shape.layoutData, shape.databaseData)
+        state.setSelection(shape.selection)
     }, [saveDocument, setDataSet])
 
 
@@ -86,6 +99,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
             contentData: state.content,
             layoutData: state.layouts ?? {},
             databaseData: state.databases ?? {},
+            selection: state.selection,
         }
 
         if (channel === 'mouse') {
@@ -179,12 +193,13 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
 
             {contentDataSet && roots.map((node) => {
                 const ComponentToRender = COMPONENT_REGISTRY[node.component as ComponentRegistryKey]
-                const isSelected = selectedBlockIds.has(node.id)
+                const isSelected = selectedBlockIds.includes(node.id)
                 return (
                     <DragContainer key={node.id}
                         id={node.id}
                         layoutData={activeFile ? layouts?.[layoutKey(activeFile.id, node.id)] : undefined}
                         isSelected={isSelected}
+                        dm={dm}
                         cbMouseEvent={handleMouseEvent}>
                         <ComponentToRender
                             contentDataSet={contentDataSet}

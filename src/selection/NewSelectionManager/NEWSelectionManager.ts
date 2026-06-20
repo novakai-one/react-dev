@@ -4,10 +4,11 @@
 //New SM needs to have uniform shape for events -> It should not be deciding what goes to CM and what does not.
 //Needs to follow same pattern as wsa where it routes uniformly regardless of teh event type.
 
-import type { DocShape } from "./docShape";
+import type { DocShape, SelectionSnapshot, CaretTarget } from "./docShape";
 import type { MouseEventData, KeyEventData, LifecycleEventData } from "./eventData";
 import type { SelectionState } from "./selectionState";
 import { emptySelection } from "./selectionState";
+import { emptySelectionSnapshot } from "./docShape";
 import { routeMouse, routeKey, routeLifecycle } from "./router";
 import { renderSelectionHighlight } from "./highlightRenderer";
 import { ClipboardManager } from "../ClaudeClipboardManager/ClipboardManager";
@@ -22,13 +23,11 @@ export class NewSelectionManager {
     private wsaEl: HTMLElement | null = null;
     private clipboard = new ClipboardManager();
 
-    // ── Block-selection store (read by WSA via useSyncExternalStore) ─────────
-    // WSA needs to know which blocks are selected to pass `isSelected` to each
-    // DragContainer. Selection lives here, so SM owns that fact. We cache the
-    // id set and only swap the reference when it actually changes, so
-    // getSelectedIds() is a stable snapshot (required by useSyncExternalStore).
-    private selectedIds: Set<string> = new Set();
-    private listeners = new Set<() => void>();
+    // Last snapshot handed back, kept so an unchanged selection returns the SAME
+    // reference. WSA reads selectedBlockIds off this via a store selector; a fresh
+    // object every event would re-render WSA on every keystroke. Stable ref =
+    // no re-render when nothing about the selection changed.
+    private lastSnapshot: SelectionSnapshot = emptySelectionSnapshot();
 
     public setWorkspaceEl = (el: HTMLElement | null): void => {
         this.wsaEl = el;
@@ -36,10 +35,11 @@ export class NewSelectionManager {
     // ── Public entry points (called only by WSA) ─────────────────────────────
     // Three channels, identical contract: (eventData, trigger, shape) -> shape.
     // Uniform body for all three: build range -> clipboard -> route -> paint ->
-    // shape. SM does NOT decide whether an event is a clipboard event; it threads
-    // every event through the clipboard, which no-ops when the trigger is not a
-    // clipboard keystroke (mirrors how WSA threads every event through every
-    // helper).
+    // snapshot -> shape. SM does NOT decide whether an event is a clipboard event;
+    // it threads every event through the clipboard, which no-ops when the trigger
+    // is not a clipboard keystroke (mirrors how WSA threads every event through
+    // every helper). The selection result is written INTO the shape as a
+    // SelectionSnapshot — no external store, no subscription.
     public receiveMouseEvent = (
         mouseData: MouseEventData,
         trigger: string,
@@ -51,8 +51,7 @@ export class NewSelectionManager {
 
         this.selection = routeMouse(this.selection, mouseData, trigger, order);
         this.applyHighlights(order);
-        this.syncSelectedIds(order);
-        return buildShape(afterClipboard, this.selection);
+        return buildShape(afterClipboard, this.selection, this.computeSnapshot(order));
     };
 
     public receiveKeyEvent = (
@@ -71,8 +70,7 @@ export class NewSelectionManager {
 
         this.selection = routeKey(this.selection, keyData, trigger, order);
         this.applyHighlights(order);
-        this.syncSelectedIds(order);
-        return buildShape(afterClipboard, selectionToEdit, deleting);
+        return buildShape(afterClipboard, selectionToEdit, this.computeSnapshot(order), deleting);
     };
 
     public receiveLifecycleEvent = (
@@ -86,21 +84,8 @@ export class NewSelectionManager {
 
         this.selection = routeLifecycle(this.selection, lifecycleData, trigger);
         this.applyHighlights(order);
-        this.syncSelectedIds(order);
-        return buildShape(afterClipboard, this.selection);
+        return buildShape(afterClipboard, this.selection, this.computeSnapshot(order));
     };
-
-
-    // ── Block-selection subscription (WSA reads this) ────────────────────────
-    // useSyncExternalStore contract: subscribe registers a listener and returns
-    // an unsubscribe; getSelectedIds returns the current snapshot (same ref
-    // until the set changes).
-    public subscribe = (listener: () => void): (() => void) => {
-        this.listeners.add(listener);
-        return () => { this.listeners.delete(listener); };
-    };
-
-    public getSelectedIds = (): Set<string> => this.selectedIds;
 
 
     // ── Internal glue ────────────────────────────────────────────────────────
@@ -115,28 +100,50 @@ export class NewSelectionManager {
         renderSelectionHighlight(this.selection, order, this.wsaEl);
     }
 
-    // Recompute which whole blocks are selected and notify WSA if it changed.
-    // Only a multi-block selection marks blocks as selected; a caret or an
-    // in-block text range is text selection, not block selection.
-    private syncSelectedIds(order: string[]): void {
-        const next = this.computeSelectedIds(order);
-        if (sameSet(next, this.selectedIds)) return;
-        this.selectedIds = next;
-        for (const listener of this.listeners) listener();
+    // The selection result WSA reads off the shape: which whole blocks are
+    // selected, and where the caret should sit. Only a multi-block selection
+    // marks whole blocks; a collapsed caret carries a caret target. Returns the
+    // previous snapshot's reference unchanged when nothing differs, so WSA does
+    // not re-render on a no-op selection pass.
+    private computeSnapshot(order: string[]): SelectionSnapshot {
+        const next: SelectionSnapshot = {
+            selectedBlockIds: this.computeSelectedIds(order),
+            caret: this.computeCaret(),
+        };
+        if (sameSnapshot(next, this.lastSnapshot)) return this.lastSnapshot;
+        this.lastSnapshot = next;
+        return next;
     }
 
-    private computeSelectedIds(order: string[]): Set<string> {
-        if (this.selection.mode !== "multi-block") return new Set();
+    private computeSelectedIds(order: string[]): string[] {
+        if (this.selection.mode !== "multi-block") return [];
         const points = orderedSelectionRange(this.selection, order);
-        return new Set(points.map((point) => point.blockId));
+        return points.map((point) => point.blockId);
+    }
+
+    // A collapsed caret (focus === anchor) is the position WSA may place. A live
+    // text range has no single caret, so it reports none.
+    private computeCaret(): CaretTarget | null {
+        const { focus } = this.selection;
+        if (!focus) return null;
+        if (this.selection.mode !== "caret") return null;
+        return { blockId: focus.blockId, offset: focus.offset };
     }
 }
 
 
-// Set equality by membership — lets syncSelectedIds keep a stable reference when
-// the selected blocks are unchanged (two empty sets compare equal).
-function sameSet(a: Set<string>, b: Set<string>): boolean {
-    if (a.size !== b.size) return false;
-    for (const value of a) if (!b.has(value)) return false;
+// Snapshot equality by value — lets computeSnapshot return a stable reference
+// when the selection is unchanged, so WSA's store selector does not re-render.
+function sameSnapshot(a: SelectionSnapshot, b: SelectionSnapshot): boolean {
+    if (!sameCaret(a.caret, b.caret)) return false;
+    if (a.selectedBlockIds.length !== b.selectedBlockIds.length) return false;
+    for (let i = 0; i < a.selectedBlockIds.length; i++) {
+        if (a.selectedBlockIds[i] !== b.selectedBlockIds[i]) return false;
+    }
     return true;
+}
+
+function sameCaret(a: CaretTarget | null, b: CaretTarget | null): boolean {
+    if (a === null || b === null) return a === b;
+    return a.blockId === b.blockId && a.offset === b.offset;
 }

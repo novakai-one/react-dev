@@ -131,7 +131,7 @@ export default class BlockManager {
             ...shape.layoutData, [layoutKey(fileId, newId)]: placement,
         }
         const content = insertAfter(shape.file.content, sourceId, [newId])
-        return { file: { ...shape.file, content }, contentData, layoutData, databaseData: shape.databaseData }
+        return { ...shape, file: { ...shape.file, content }, contentData, layoutData }
     }
 
 
@@ -160,7 +160,7 @@ export default class BlockManager {
         }
 
         const content = shape.file.content.filter(id => id !== blockId)
-        return { file: { ...shape.file, content }, contentData, layoutData, databaseData }
+        return { ...shape, file: { ...shape.file, content }, contentData, layoutData, databaseData }
     }
 
 
@@ -176,7 +176,7 @@ export default class BlockManager {
         const layoutData:  LayoutDataSet  = {
             ...shape.layoutData, [layoutKey(placement.fileId, block.id)]: placement,
         }
-        return { file: { ...shape.file, content }, contentData, layoutData, databaseData: shape.databaseData }
+        return { ...shape, file: { ...shape.file, content }, contentData, layoutData }
     }
 
 
@@ -213,7 +213,7 @@ export default class BlockManager {
         }
         const databaseData: DatabaseDataSet = { ...shape.databaseData, [newId]: config }
         const content = [...shape.file.content, newId]
-        return { file: { ...shape.file, content }, contentData, layoutData, databaseData }
+        return { ...shape, file: { ...shape.file, content }, contentData, layoutData, databaseData }
     }
 
 

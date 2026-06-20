@@ -10,4 +10,8 @@ export type {
     LayoutDataSet,
     DatabaseDataSet,
     TextElement,
+    SelectionSnapshot,
+    CaretTarget,
 } from "../../types/types";
+
+export { emptySelectionSnapshot } from "../../types/types";

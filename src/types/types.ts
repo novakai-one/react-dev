@@ -210,17 +210,42 @@ export interface LayoutItem extends LayoutData {
 
 export type LayoutDataSet = Record<string, LayoutItem>
 
+// ── Selection snapshot ─────────────────────────────────────────────────
+// The selection result carried INSIDE the shape, so every conduit helper and
+// WSA read it from one place instead of a separate store/subscription. SM is
+// the writer; BM may seed `caret` when it creates a block; WSA reads it on the
+// render that the commit already triggers.
+//
+//   selectedBlockIds — whole blocks highlighted (multi-block selection only).
+//   caret            — where the caret should sit: a block id + text offset.
+//                      null when there is no caret to place (e.g. pure range).
+export interface CaretTarget {
+    blockId: string,
+    offset: number,
+}
+
+export interface SelectionSnapshot {
+    selectedBlockIds: string[],
+    caret: CaretTarget | null,
+}
+
+export function emptySelectionSnapshot(): SelectionSnapshot {
+    return { selectedBlockIds: [], caret: null }
+}
+
 // ── Conduit shape ──────────────────────────────────────────────────────
 // The uniform document slices WSA threads through every conduit helper. WSA
 // seeds it from its rendered store state and hands it to each helper in turn;
 // each returns the (possibly mutated) shape; WSA commits the final one and React
 // diffs. `file` is the active file so a helper can place/order within it without
-// reaching into the store.
+// reaching into the store. `selection` rides along so selected blocks + caret
+// travel with the document instead of through a separate store.
 export interface DocShape {
     file:        FileData | null,
     contentData: ContentDataSet,
     layoutData:  LayoutDataSet,
     databaseData: DatabaseDataSet,
+    selection:   SelectionSnapshot,
 }
 
 // Composite key so one block can be placed in many files without collisions.
@@ -324,14 +349,23 @@ export const databaseKey = (blockId: string): string => blockId
 
 // ── Drag-container ───────────────────────────────────────────────────────
 
+// The only DragManager capability DragContainer needs at render: "is this block
+// the active drag target?". Declared structurally here so types.ts depends on
+// nothing (DragManager satisfies this shape without types importing it).
+export interface DragTargetQuery {
+    isDragging: (blockId: string) => boolean,
+}
+
 export interface DragContainerProps {
     id: string,
     children: ReactNode,
     // The conduit — DragContainer forwards raw mouse data + trigger, never decides.
     cbMouseEvent: (mouseData: MouseEventData, trigger: string) => void,
-    // SM-owned block-selection flag — WSA passes the value off useSyncExternalStore.
+    // Block-selection flag — WSA reads it off the committed shape's selection.
     isSelected?: boolean,
     // The placement's geometry for this block in the active file. Optional only
     // while a block is first being placed (before its LayoutItem exists).
     layoutData?: LayoutData,
+    // Lets the container yield `top` ownership to DM during an active drag.
+    dm?: DragTargetQuery,
 }
