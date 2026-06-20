@@ -8,11 +8,10 @@
 // unreliable (defaults to 80, or 0 on drop) and never tracks content, so the
 // collision pass needs a fresh measurement to keep blocks flush.
 
-import { GRID_UNIT, rowsForHeight, heightForRows } from '../../layout/grid'
-import { resolveCollisions } from '../../layout/collisionManager'
-import { collapseAfterDelete } from '../../layout/layoutManager'
-import { layoutKey } from '../../types/types'
-import type { LayoutDataSet, LayoutItem } from '../../types/types'
+import { GRID_UNIT, rowsForHeight, heightForRows, snapToGrid } from './grid'
+import { resolveCollisions } from './collisionManager'
+import { layoutKey } from '../types/types'
+import type { LayoutDataSet, LayoutItem } from '../types/types'
 
 
 // Defaults for newly created blocks (pixels — not grid based).
@@ -52,6 +51,34 @@ export function measuredItemsForFile(
         items.push({ ...item, h })
     }
     return items
+}
+
+
+// Moved here from layoutManager.ts to break a circular import (both files now
+// live in layout/; layoutManager imports from this file, so this function could
+// not import back). Flagged in layoutManager: collapse should eventually route
+// through the normal key-event handler.
+/**
+ * After a block at `deletedY` (height `deletedH`) is removed, raise every block
+ * below it by the vacated height + the gap that sat beneath it, so the doc
+ * closes the hole. Results snap back to the grid. Inputs are not mutated.
+ *
+ * `items` is the REMAINING placements for one file (the deleted one already
+ * dropped). Only blocks strictly below the deleted top move.
+ */
+export function collapseAfterDelete(
+    items: LayoutItem[],
+    deletedY: number,
+    deletedH: number,
+    gap: number,
+): LayoutItem[] {
+    const shift = deletedH + gap
+    if (shift <= 0) return items.map(i => ({ ...i }))
+
+    return items.map(item => {
+        if (item.y <= deletedY) return { ...item }
+        return { ...item, y: snapToGrid(Math.max(deletedY, item.y - shift)) }
+    })
 }
 
 

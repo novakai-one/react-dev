@@ -2,6 +2,14 @@
    Lives as a flex child of .drag-container. NO margin here: nested ContentAreas
    would compound it (you'd see ever-growing handle-to-text gaps). */
 
+/* Cross-block text selection paint. The highlightRenderer registers the selected
+   Range under the "doc-selection" name via the CSS Custom Highlight API; this
+   rule supplies its colour. Native ::selection is suppressed on editable blocks
+   so the two highlight systems never double-paint. */
+::highlight(doc-selection) {
+    background-color: var(--selection, rgba(80, 140, 255, 0.35));
+}
+
 .content-area {
     flex: 1;
     /* flex children with overflowing content need min-width: 0, otherwise

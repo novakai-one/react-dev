@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import { useDocumentStorage } from '../../storage/useDocumentStorage'
 import { COMPONENT_REGISTRY, type ComponentRegistryKey } from '../../types/registry'

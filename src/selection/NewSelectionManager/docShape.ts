@@ -9,4 +9,5 @@ export type {
     ContentDataSet,
     LayoutDataSet,
     DatabaseDataSet,
+    TextElement,
 } from "../../types/types";

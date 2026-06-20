@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify": "npm run verify:types && npm run verify:lint && npm run verify:deps && npm run verify:conduit",
+    "verify:types": "tsc --noEmit",
+    "verify:lint": "eslint src --max-warnings 30",
+    "verify:deps": "depcruise src --config .dependency-cruiser.cjs",
+    "verify:conduit": "node scripts/verify-conduit.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
@@ -21,6 +26,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "dependency-cruiser": "^17.4.3",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

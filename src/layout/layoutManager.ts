@@ -1,41 +1,18 @@
 // ── LayoutManager ───────────────────────────────────────────────────────────
 // Keeps the document tidy after structural changes: pulls blocks up to fill the
-// hole a deleted block left behind. Pure functions, no state, no DOM, no store —
-// WSA is the only caller (it measures the deleted rect and persists the result).
+// hole a deleted block left behind. WSA is the only caller (it measures the
+// deleted rect and persists the result).
+//
+// NOTE (layout-layer review pending): _tidy delegates to workspaceLayout helpers
+// that read the live DOM (measuredBlockHeight). So this layer is NOT DOM-free as
+// originally stated — flagged for the later layout/ boundary review.
 //
 // Single-column assumption (same as CollisionManager): a full-width delete pulls
 // EVERYTHING below up by the vacated height. When x unlocks, restrict the pull
 // to blocks whose x-range overlaps the deleted column.
 
 import type { LayoutItem, MouseEventData, KeyEventData, LifecycleEventData, DocShape } from '../types/types'
-import { snapToGrid } from './grid'
-import { resolveFileCollisions, orderByPosition } from '../components/workspace/workspaceLayout'
-
-
-//Not good design -> collapse after deeath should go through the normal key event handler.
-/**
- * After a block at `deletedY` (height `deletedH`) is removed, raise every block
- * below it by the vacated height + the gap that sat beneath it, so the doc
- * closes the hole. Results snap back to the grid. Inputs are not mutated.
- *
- * `items` is the REMAINING placements for one file (the deleted one already
- * dropped). Only blocks strictly below the deleted top move.
- * 
- */
-export function collapseAfterDelete(
-    items: LayoutItem[],
-    deletedY: number,
-    deletedH: number,
-    gap: number,
-): LayoutItem[] {
-    const shift = deletedH + gap
-    if (shift <= 0) return items.map(i => ({ ...i }))
-
-    return items.map(item => {
-        if (item.y <= deletedY) return { ...item }
-        return { ...item, y: snapToGrid(Math.max(deletedY, item.y - shift)) }
-    })
-}
+import { resolveFileCollisions, orderByPosition } from './workspaceLayout'
 
 
 // ── LayoutManager (class) ────────────────────────────────────────────────

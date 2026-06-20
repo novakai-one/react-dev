@@ -20,6 +20,24 @@ const PLACEHOLDERS: Record<string, string> = {
 }
 
 
+// The caret's character offset inside `blockEl`'s text. Read here, in the block
+// that owns the contentEditable, so the offset travels on the KeyEventData and no
+// downstream module touches the DOM. Returns -1 when there is no caret in scope.
+function readCaretOffset(blockEl: HTMLElement | null): number {
+    if (!blockEl) return -1
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) return -1
+
+    const caretRange = selection.getRangeAt(0)
+    if (!blockEl.contains(caretRange.startContainer)) return -1
+
+    const offsetRange = caretRange.cloneRange()
+    offsetRange.selectNodeContents(blockEl)
+    offsetRange.setEnd(caretRange.startContainer, caretRange.startOffset)
+    return offsetRange.toString().length
+}
+
+
 interface ContentAreaProps {
     activeContent: TextElement,
     contentDataSet: ContentDataSet,
@@ -95,6 +113,7 @@ export default function ContentArea({
             altKey:    e.altKey,
             blockId:   id,
             blockType: component,
+            offset:    readCaretOffset(contentRef.current),
             nativeEvent: e,
         }
         cbKeyboardEvent(keyData, trigger)

@@ -4,6 +4,7 @@ import type {
     LayoutDataSet,
     DatabaseDataSet,
     TextElement,
+    KeyEventData,
 } from "../../types/types"
 import { layoutKey } from "../../types/types"
 import type { SelectionPoint } from "../NewSelectionManager/selectionState"
@@ -117,7 +118,9 @@ function pasteMultiBlockText(
         const newId    = freshId()
         const lastText = selectedTextOf(lastPoint, slice)
         contentData[newId] = newBlockFrom(lastSource, newId, lastText)
-        nextY = placeNewBlock(layoutData, slice, lastPoint.blockId, newId, fileId, nextY)
+        // placeNewBlock mutates layoutData (the returned value); its numeric
+        // return is unused here, so we call for the side effect only.
+        placeNewBlock(layoutData, slice, lastPoint.blockId, newId, fileId, nextY)
         newIds.push(newId)
     }
 
@@ -130,28 +133,29 @@ function pasteMultiBlockText(
 }
 
 // The caret offset inside the caret block. The collapsed caret travels on the
-// paste event the same way the copy offsets travelled on the copy event.
-// PLACEHOLDER for the exact field: KeyEventData has no offset member yet, so this
-// defaults to the end of the block until SM threads the caret offset through.
-function readCaretOffset(_eventData: unknown, caretBlock: TextElement): number {
-    // Placeholder: read the caret offset off the paste event once it carries one.
-    return caretBlock.innerContent.length
+// paste event the same way the copy offsets travelled on the copy event:
+// ContentArea reads it off the live selection and writes it onto KeyEventData.
+// Falls back to the end of the block when the event carries no caret (offset -1).
+function readCaretOffset(eventData: unknown, caretBlock: TextElement): number {
+    const offset = (eventData as KeyEventData)?.offset
+    if (offset === undefined || offset < 0) return caretBlock.innerContent.length
+    return offset
 }
 
 // The copied substring for one selection point, taken from the buffered block
-// content (NOT the DOM). A whole-block point (offset -1) returns the full content;
-// otherwise the content is sliced by the point's offset.
-//
-// One offset per point only describes one edge. block[0] runs offset -> end of
-// line; block[last] runs 0 -> offset. PLACEHOLDER: the from/to derivation below
-// assumes that convention and is revisited if the range carries both edges.
+// content (NOT the DOM). A whole-block point (offset -1) returns the full
+// content; otherwise the content is sliced by the point's [offset, offsetEnd]
+// span. offsetEnd -1 on a non-whole point means "to the end of the block".
 function selectedTextOf(point: SelectionPoint, slice: ClipboardSlice): string {
-    const block = slice.contentData[point.blockId]
-    if (!block) return ""
-    const text = block.innerContent
+    const block = slice.contentData[point.blockId];
+    if (!block) return "";
+    const text = block.innerContent;
 
-    if (point.offset < 0) return text          // whole block (offset -1)
-    return text                                 // PLACEHOLDER: slice by edge offset
+    if (point.offset < 0) return text;                       // whole block (offset -1)
+
+    const from = clampOffset(point.offset, text.length);
+    const to   = point.offsetEnd < 0 ? text.length : clampOffset(point.offsetEnd, text.length);
+    return text.slice(Math.min(from, to), Math.max(from, to));
 }
 
 // Splice `insert` into `base` at `at`, returning the merged string.

@@ -13,6 +13,7 @@ import { renderSelectionHighlight } from "./highlightRenderer";
 import { ClipboardManager } from "../ClaudeClipboardManager/ClipboardManager";
 import { buildShape } from "./shapeBuilder";
 import { orderedSelectionRange } from "./range";
+import { isDeleteKey } from "./keyHandlers";
 
 
 export class NewSelectionManager {
@@ -53,9 +54,14 @@ export class NewSelectionManager {
         const range = orderedSelectionRange(this.selection, order);
         const afterClipboard = this.clipboard.receiveEvent(keyData, null, trigger, shape, range);
 
+        // A delete cuts the span as it stands BEFORE routing collapses it, so the
+        // pre-route selection is what shapeBuilder must read to remove text.
+        const deleting = trigger === "keydown" && isDeleteKey(keyData);
+        const selectionToEdit = this.selection;
+
         this.selection = routeKey(this.selection, keyData, trigger, order);
         this.applyHighlights(order);
-        return buildShape(afterClipboard, this.selection);
+        return buildShape(afterClipboard, selectionToEdit, deleting);
     };
 
     public receiveLifecycleEvent = (

@@ -6,12 +6,12 @@
 import type { SelectionState } from "./selectionState";
 import type { LifecycleEventData } from "./eventData";
 
-// Blur: a block lost focus. Placeholder — decide whether selection persists,
-// collapses, or clears on blur during migration.
+// Blur: a block lost focus. Selection is intentionally PERSISTED across blur —
+// committing the block's edited text is BlockManager's concern (content-area-blur
+// flows there), not the selection's, so SM leaves anchor/focus untouched.
 export function handleBlur(
     state: SelectionState,
-    lifecycleData: LifecycleEventData,
+    _lifecycleData: LifecycleEventData,
 ): SelectionState {
-    console.log("placeholder - trigger", lifecycleData);
     return state;
 }

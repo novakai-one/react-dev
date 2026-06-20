@@ -15,7 +15,6 @@
 // block's content is untouched.
 
 import { snapToGrid, GRID_UNIT, PAGE_X, rowsForHeight, heightForRows } from '../../layout/grid'
-import { collapseAfterDelete } from '../../layout/layoutManager'
 import { layoutKey } from '../../types/types'
 import type {
     TextElement,
@@ -31,12 +30,13 @@ import {
     measuredItemsForFile,
     resolveFileCollisions,
     orderByPosition,
+    collapseAfterDelete,
     NEW_BLOCK_DEFAULT_W,
     NEW_BLOCK_DEFAULT_H,
     NEW_BLOCK_DEFAULT_X,
     NEW_BLOCK_VERTICAL_GAP,
     NEW_BLOCK_CONTENT,
-} from './workspaceLayout'
+} from '../../layout/workspaceLayout'
 
 
 // The next document slices after a content + layout change.

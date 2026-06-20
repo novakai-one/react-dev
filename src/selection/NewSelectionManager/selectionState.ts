@@ -1,6 +1,7 @@
 export interface SelectionPoint {
     blockId: string;
-    offset: number;
+    offset: number;     // start of the selected span in this block (-1 = whole block)
+    offsetEnd: number;  // end of the selected span in this block (-1 = whole block / caret has no span)
 }
 
 export type SelectionMode = "caret" | "range" | "multi-block";

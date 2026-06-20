@@ -22,18 +22,19 @@ const SHOW_DESIGN_DEMO = new URLSearchParams(window.location.search).has('demo')
 // callbacks). They MUST survive across renders or any in-flight gesture is lost.
 // Held in refs so a single instance threads through every child for the app's lifetime.
 export default function App() {
-    // ── DEMO TOGGLE: short-circuits to the concept preview when URL has ?demo. ──
-    // Constant flag → safe early return (hook order never differs between renders).
-    if (SHOW_DESIGN_DEMO) return <DesignDemo />
-
     const smRef = useRef<NewSelectionManager | null>(null)
     const dmRef = useRef<DragManager | null>(null)
     const bmRef = useRef<BlockManager | null>(null)
     const lmRef = useRef<LayoutManager | null>(null)
+    /* eslint-disable react-hooks/refs --
+       Intentional lazy-init: managers are long-lived stateful objects that must
+       be created exactly once and survive every render (see header comment).
+       The if-null write during render is the standard once-only ref init. */
     if (!smRef.current) smRef.current = new NewSelectionManager()
     if (!dmRef.current) dmRef.current = new DragManager()
     if (!bmRef.current) bmRef.current = new BlockManager()
     if (!lmRef.current) lmRef.current = new LayoutManager()
+    /* eslint-enable react-hooks/refs */
 
     // Selectors (not destructure-of-full-state) — otherwise this component
     // re-renders on every store change, which used to recreate SM/DM mid-gesture.
@@ -63,6 +64,10 @@ export default function App() {
         return () => { cancelled = true }
     }, [status, loadDocument, setDataSet])
 
+    // ── DEMO TOGGLE: short-circuits to the concept preview when URL has ?demo. ──
+    // Placed after all hooks so hook order is identical on every render.
+    if (SHOW_DESIGN_DEMO) return <DesignDemo />
+
     if (status === 'loading') return <div className="app-loading">Loading…</div>
     if (status === 'signed-out') return <Login />
 
@@ -70,6 +75,7 @@ export default function App() {
         <div className={`app page-${pageWidth}`}>
             <button className="sign-out" onClick={() => void signOut()}>Sign out</button>
             <LeftPanel />
+            {/* eslint-disable-next-line react-hooks/refs -- managers are stable for the app's lifetime; reading .current to thread them to children is intended */}
             <Editor sm={smRef.current} dm={dmRef.current} bm={bmRef.current} lm={lmRef.current} />
             <RightPanel />
         </div>

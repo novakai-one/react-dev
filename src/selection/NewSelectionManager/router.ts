@@ -15,19 +15,20 @@ import {
 import { handleKeyDown } from "./keyHandlers";
 import { handleBlur } from "./lifecycleHandlers";
 
-// Mouse: trigger -> one mouse handler.
+// Mouse: trigger -> one mouse handler. blockOrder is unused for mouse routing
+// (the handlers resolve position from the DOM via clientX/clientY), kept in the
+// signature so all three channels read uniformly.
 export function routeMouse(
     state: SelectionState,
     mouseData: MouseEventData,
     trigger: string,
-    blockOrder: string[],
+    _blockOrder: string[],
 ): SelectionState {
-    console.log("placeholder - trigger", blockOrder);
     switch (trigger) {
-        case "mousedown": return handleMouseDown(state, mouseData);
-        case "mousemove": return handleMouseDrag(state, mouseData);
-        case "mouseup":   return handleMouseUp(state, mouseData);
-        default:          return state;
+        case "content-area-mouse-down": return handleMouseDown(state, mouseData);
+        case "workspace-mouse-move":   return handleMouseDrag(state, mouseData);
+        case "workspace-mouse-up":     return handleMouseUp(state, mouseData);
+        default:                       return state;
     }
 }
 

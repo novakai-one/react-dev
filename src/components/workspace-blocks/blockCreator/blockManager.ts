@@ -17,7 +17,7 @@ import {
     NEW_BLOCK_VERTICAL_GAP,
     NEW_BLOCK_TOP,
     NEW_BLOCK_CONTENT,
-} from '../../workspace/workspaceLayout'
+} from '../../../layout/workspaceLayout'
 import { layoutKey } from '../../../types/types'
 import { makeDatabaseConfig, makeDatabaseRow, DB_BLOCK_DEFAULT_H } from '../../../database/databaseFactory'
 import type {
