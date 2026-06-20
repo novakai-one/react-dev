@@ -11,7 +11,7 @@ import type {
     DocShape,
 } from '../../types/types'
 import { layoutKey } from '../../types/types'
-import type SelectionManager from '../../selection/selectionManager/SelectionManager'
+import type { NewSelectionManager } from '../../selection/NewSelectionManager/NEWSelectionManager'
 import type DragManager from '../../draggable/dragManager/DragManager'
 import type BlockManager from '../workspace-blocks/blockCreator/blockManager'
 import type LayoutManager from '../../layout/layoutManager'
@@ -22,7 +22,7 @@ import './workspace.css'
 
 
 interface WorkspaceAreaProps {
-    sm: SelectionManager,
+    sm: NewSelectionManager,
     dm: DragManager,
     bm: BlockManager,
     lm: LayoutManager,
@@ -125,21 +125,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
         dm.setWorkspaceEl(wsaRef.current)
     }, [sm, bm, dm])
 
-    useEffect(() => {
-        if (!activeFile) return
-        sm.setBlockOrder(activeFile.content)
-    }, [sm, activeFile])
 
-
-    // ── Focus the freshly-created block once it's in the DOM ─────────────────
-    // Parent effects fire AFTER children, so React has committed the new block's
-    // contentEditable by the time this runs.
-    useEffect(() => {
-        if (pendingFocusRef.current) {
-            sm.focusBlockStart(pendingFocusRef.current)
-            pendingFocusRef.current = null
-        }
-    }, [sm, activeFile])
 
 
     // ── Document-level mouse move/up bridge (see hook for why on document) ────
@@ -152,11 +138,8 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     useWorkspacePointerBridge(forwardMouse)
 
 
-    // ── Block selection store (SM is the source of truth) ────────────────────
-
-    const selectedBlockIds = useSyncExternalStore(sm.subscribe, sm.getSelectedBlocksSnapshot)
-
-
+    
+    // pretty sure this should be deleted. Feels like a selectionmanager and layoutmanager job.
     // ── DragManager drop: move the placement, then tidy via LayoutManager ────
 
     useEffect(() => {
@@ -215,10 +198,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     return (
         <div className="workspace-area"
             ref={wsaRef}
-            //mousedown only — workspace-mouse-move/up live on document so they
-            //fire even when the cursor leaves the workspace mid-gesture.
             onMouseDown={(event) => handleWorkspaceMouseEvent(event, "workspace-mouse-down")}
-            //click on empty canvas creates a block at that grid row (see handler).
             onClick={handleWorkspaceClick}>
 
             {roots.length === 0 && <WorkspaceEmptyState />}

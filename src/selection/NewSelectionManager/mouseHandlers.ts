@@ -1,7 +1,3 @@
-// ── mouseHandlers.ts ──────────────────────────────────────────────────────────
-// Pure mouse gesture logic.
-// Selection state in -> new selection state out.
-// No DOM writes. No setters. No re-render.
 
 import type { SelectionState } from "./selectionState";
 import type { MouseEventData } from "./eventData";

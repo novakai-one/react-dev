@@ -37,6 +37,7 @@ export type KeyEventData = {
     altKey: boolean,
     blockId: string,
     blockType: string,
+    offset: number, // caret offset inside the block's text at the time the key fired (-1 when unknown)
     nativeEvent: React.KeyboardEvent,
 }
 

@@ -11,7 +11,7 @@ import type { KeyEventData } from "./eventData";
 
 // blockOrder (shape.file.content) is the source of truth for crossing block
 // boundaries — e.g. ArrowLeft at offset 0 moves to the end of the previous block.
-
+//requires modifier key names shift-arrow-lefft and shift-arrow-right etc.
 export function arrowLeft(state: SelectionState, key: KeyEventData, blockOrder: string[]): SelectionState {
     console.log("placeholder - trigger", key, blockOrder);
     // Placeholder: collapse to caret, move focus one char left, cross block at offset 0.

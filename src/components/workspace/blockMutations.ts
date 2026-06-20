@@ -25,7 +25,7 @@ import type {
     LayoutDataSet,
     LayoutItem,
 } from '../../types/types'
-import type { ClipboardBlockData } from '../../selection/selectionManager/SelectionManager'
+import type { ClipboardBlockData } from '../../selection/OldselectionManager/OldSelectionManager'
 import {
     measuredBlockHeight,
     measuredItemsForFile,

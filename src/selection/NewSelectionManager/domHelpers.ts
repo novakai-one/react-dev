@@ -10,7 +10,7 @@ import type { SelectionPoint } from "./selectionState";
 // Placeholder: real version wraps caretPositionFromPoint.
 export function pointToPosition(clientX: number, clientY: number): SelectionPoint {
     console.log("placeholder - trigger", clientX, clientY);
-    return { elementId: "", offset: 0 };
+    return { blockId: "", offset: 0 };
 }
 
 // Maps a document position back to viewport coords.

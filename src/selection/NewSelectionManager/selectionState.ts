@@ -1,9 +1,5 @@
-// ── selectionState.ts ─────────────────────────────────────────────────────────
-// Types + tiny pure state transforms.
-// No DOM. No setters. No re-render.
-
 export interface SelectionPoint {
-    elementId: string; // the same as blockId
+    blockId: string;
     offset: number;
 }
 

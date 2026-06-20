@@ -6,7 +6,7 @@ import type {
     TextElement,
 } from "../../types/types"
 import { layoutKey } from "../../types/types"
-import type { SelectionPoint } from "../ClaudeSelectionManager/selectionState"
+import type { SelectionPoint } from "../NewSelectionManager/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { freshId } from "./ids"
 import { insertIndexAfter, bottomEdgeOfAnchor, insertIntoContent } from "./pasteShared"
@@ -103,21 +103,21 @@ function pasteMultiBlockText(
 
     // Middle blocks: whole-block (offset -1) -> full source content, fresh id.
     for (const mp of middlePoints) {
-        const source = slice.contentData[mp.elementId]
+        const source = slice.contentData[mp.blockId]
         if (!source) continue
         const newId = freshId()
         contentData[newId] = newBlockFrom(source, newId, source.innerContent)
-        nextY = placeNewBlock(layoutData, slice, mp.elementId, newId, fileId, nextY)
+        nextY = placeNewBlock(layoutData, slice, mp.blockId, newId, fileId, nextY)
         newIds.push(newId)
     }
 
     // Last block: only the selected portion (0 -> end offset), fresh id.
-    const lastSource = slice.contentData[lastPoint.elementId]
+    const lastSource = slice.contentData[lastPoint.blockId]
     if (lastSource) {
         const newId    = freshId()
         const lastText = selectedTextOf(lastPoint, slice)
         contentData[newId] = newBlockFrom(lastSource, newId, lastText)
-        nextY = placeNewBlock(layoutData, slice, lastPoint.elementId, newId, fileId, nextY)
+        nextY = placeNewBlock(layoutData, slice, lastPoint.blockId, newId, fileId, nextY)
         newIds.push(newId)
     }
 
@@ -146,7 +146,7 @@ function readCaretOffset(_eventData: unknown, caretBlock: TextElement): number {
 // line; block[last] runs 0 -> offset. PLACEHOLDER: the from/to derivation below
 // assumes that convention and is revisited if the range carries both edges.
 function selectedTextOf(point: SelectionPoint, slice: ClipboardSlice): string {
-    const block = slice.contentData[point.elementId]
+    const block = slice.contentData[point.blockId]
     if (!block) return ""
     const text = block.innerContent
 

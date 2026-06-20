@@ -6,7 +6,7 @@ import type {
     FileData,
 } from "../../types/types"
 import { layoutKey, databaseKey } from "../../types/types"
-import type { SelectionPoint } from "../ClaudeSelectionManager/selectionState"
+import type { SelectionPoint } from "../NewSelectionManager/selectionState"
 import { clipboardStore } from "./clipboardStore"
 import { buildSlice } from "./copy"
 import { resolveSelectedIds } from "./selectionRange"

@@ -9,7 +9,7 @@ import { useThemeStore } from './theme/useThemeStore'
 import { useLayoutStore } from './layout/useLayoutStore'
 import { useAuthStore } from './auth/useAuthStore'
 import Login from './auth/Login'
-import SelectionManager from './selection/selectionManager/SelectionManager'
+import { NewSelectionManager } from './selection/NewSelectionManager/NEWSelectionManager'
 import DragManager from './draggable/dragManager/DragManager'
 import BlockManager from './components/workspace-blocks/blockCreator/blockManager'
 import LayoutManager from './layout/layoutManager'
@@ -26,11 +26,11 @@ export default function App() {
     // Constant flag → safe early return (hook order never differs between renders).
     if (SHOW_DESIGN_DEMO) return <DesignDemo />
 
-    const smRef = useRef<SelectionManager | null>(null)
+    const smRef = useRef<NewSelectionManager | null>(null)
     const dmRef = useRef<DragManager | null>(null)
     const bmRef = useRef<BlockManager | null>(null)
     const lmRef = useRef<LayoutManager | null>(null)
-    if (!smRef.current) smRef.current = new SelectionManager()
+    if (!smRef.current) smRef.current = new NewSelectionManager()
     if (!dmRef.current) dmRef.current = new DragManager()
     if (!bmRef.current) bmRef.current = new BlockManager()
     if (!lmRef.current) lmRef.current = new LayoutManager()

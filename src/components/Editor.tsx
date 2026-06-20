@@ -3,12 +3,12 @@ import './editor.css'
 import Header from "./header/Header"
 import Footer from "./footer/Footer"
 import WorkspaceArea from "./workspace/WorkspaceArea"
-import type SelectionManager from "../selection/selectionManager/SelectionManager"
+import type { NewSelectionManager } from "../selection/NewSelectionManager/NEWSelectionManager"
 import type DragManager from "../draggable/dragManager/DragManager"
 import type BlockManager from "./workspace-blocks/blockCreator/blockManager"
 import type LayoutManager from "../layout/layoutManager"
 interface EditorProps {
-    sm: SelectionManager,
+    sm: NewSelectionManager,
     dm: DragManager,
     bm: BlockManager,
     lm: LayoutManager

@@ -1,5 +1,5 @@
 import type { DocShape } from "../../types/types"
-import type { SelectionPoint } from "../ClaudeSelectionManager/selectionState"
+import type { SelectionPoint } from "../NewSelectionManager/selectionState"
 
 // Turns SM's selection range into the selected block ids in document order. The range may
 // arrive unordered or with repeats; file.content is the source of truth for order (the same
@@ -9,7 +9,7 @@ export function resolveSelectedIds(range: SelectionPoint[], shape: DocShape): st
     if (range.length === 0 || !shape.file) return []
 
     const documentOrder = shape.file.content
-    const selectedIds = dedupe(range.map(point => point?.elementId))
+    const selectedIds = dedupe(range.map(point => point?.blockId))
 
     return selectedIds
         .filter(id => documentOrder.includes(id))
