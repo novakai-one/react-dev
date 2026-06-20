@@ -43,6 +43,7 @@ function removeBlocks(ids: string[], shape: DocShape): DocShape {
     }
 
     return {
+        ...shape,
         file: removeFromContent(shape.file, idsToRemove),
         contentData,
         layoutData,

@@ -67,14 +67,10 @@ function preventNativeClipboard(eventData: unknown): void {
 }
 
 // A new top-level shape with the same dataset references — a fresh identity for React
-// when clipboard made no document change.
+// when clipboard made no document change. Spreads the source so `selection` (and any
+// future field) carries through unchanged.
 function freshShape(shape: DocShape): DocShape {
-    return {
-        file:         shape.file,
-        contentData:  shape.contentData,
-        layoutData:   shape.layoutData,
-        databaseData: shape.databaseData,
-    }
+    return { ...shape }
 }
 
 export type { ClipboardMode }

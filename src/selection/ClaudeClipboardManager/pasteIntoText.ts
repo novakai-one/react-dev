@@ -125,6 +125,7 @@ function pasteMultiBlockText(
     }
 
     return {
+        ...shape,
         file: insertIntoContent(shape.file, newIds, insertIdx),
         contentData,
         layoutData,

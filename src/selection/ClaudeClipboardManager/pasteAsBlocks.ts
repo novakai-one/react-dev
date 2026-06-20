@@ -88,6 +88,7 @@ function mergePastedBlocks(
     }
 
     return {
+        ...shape,
         file: insertIntoContent(shape.file, pasted.orderedIds, insertIdx),
         contentData,
         layoutData,
