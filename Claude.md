@@ -39,7 +39,9 @@ If you get stuck at a point for 2 failures on same point you can leave the error
 
 Do not spend more than 10 seconds planning without executing. You will get stuck when you already have enough information.
 
-You have permission to make mistakes as we can then fix them
+You have permission to make mistakes as we can then fix them.
+
+Batch your tasks -> plan a little, execute, build, find errors, fix. Repeat. Don't get stuck planning.
 
 ---
 
@@ -150,8 +152,7 @@ You must follow these even though no tool catches them. I check by reading.
 
 - Work in small verifiable chunks. One module → design block → code → verify →
   next. Do not batch five modules before verifying.
-- When in doubt about a design choice, STOP and ask in one line. Do not guess
-  and build 300 lines on a wrong assumption.
+- When in doubt about a design choice, choose something that could work now and would not be a drift in code design and class responsibilities.
 - Never weaken or delete a rule in `npm run verify` to make your code pass.
   If a rule blocks you and you think it's wrong, say so and wait. Editing the
   guardrail to pass is the single worst thing you can do here.

@@ -64,14 +64,23 @@ export default function ContentArea({
     const isLeaf = !children || children.length === 0
     const [isEmpty, setIsEmpty] = useState(isLeaf && innerContent.trim() === '')
 
-    // Seed the editable on mount. innerText (not innerHTML) is mandatory:
-    // SM persists via innerText too, so the round-trip stays consistent. Using
-    // innerHTML here would render saved <br> tags as literal text on the next
-    // mount. See SelectionManager._readBlockContent for the symmetric read.
+    // Seed AND re-sync the editable from the committed model text.
+    //
+    // Runs on mount and on every change to innerContent (the store value). The
+    // guard `current.innerText !== innerContent` makes this a no-op during normal
+    // typing: the keystroke already put that text in the DOM, so DOM and store
+    // match and nothing is rewritten. It writes only when the model changed the
+    // text out from under the DOM:
+    //   - a range delete cut a span from THIS (same-id) block
+    //   - any other programmatic edit set new text
+    // The old mount-only effect ran once, so a same-id edit never re-seeded and
+    // the model change stayed invisible. innerText (not innerHTML) keeps the SM
+    // read/write round-trip consistent.
     useEffect(() => {
         if (!contentRef.current) return
+        if (contentRef.current.innerText === innerContent) return
         contentRef.current.innerText = innerContent
-    }, [])
+    }, [innerContent])
 
     // Keep the placeholder in sync as the user types. textContent (not innerText)
     // is the cheap read here; we only care whether anything is there.
