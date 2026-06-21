@@ -10,8 +10,8 @@
 
 import { GRID_UNIT, rowsForHeight, heightForRows, snapToGrid } from './grid'
 import { resolveCollisions } from './collisionManager'
-import { layoutKey } from '../types/types'
-import type { LayoutDataSet, LayoutItem } from '../types/types'
+import { layoutKey } from '../../types/types'
+import type { LayoutDataSet, LayoutItem } from '../../types/types'
 
 
 // Defaults for newly created blocks (pixels — not grid based).

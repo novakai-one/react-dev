@@ -11,7 +11,7 @@ import { emptySelection } from "./selectionState";
 import { emptySelectionSnapshot } from "./docShape";
 import { routeMouse, routeKey, routeLifecycle } from "./router";
 import { renderSelectionHighlight } from "./highlightRenderer";
-import { ClipboardManager } from "../ClaudeClipboardManager/ClipboardManager";
+import { ClipboardManager } from "../clipboard/ClipboardManager";
 import { buildShape } from "./shapeBuilder";
 import { orderedSelectionRange } from "./range";
 import { isDeleteKey } from "./keyHandlers";

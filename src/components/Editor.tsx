@@ -3,10 +3,10 @@ import "./editor.css";
 import Header from "./header/Header";
 import Footer from "./footer/Footer";
 import WorkspaceArea from "./workspace/WorkspaceArea";
-import type { NewSelectionManager } from "../selection/NewSelectionManager/NEWSelectionManager";
-import type DragManager from "../draggable/dragManager/DragManager";
-import type BlockManager from "./workspace-blocks/blockCreator/blockManager";
-import type LayoutManager from "../layout/layoutManager";
+import type { NewSelectionManager } from "../utils/selection/selection/NEWSelectionManager"
+import type DragManager from "../utils/draggable/dragManager/DragManager";
+import type BlockManager from "./blocks/blockCreator/blockManager";
+import type LayoutManager from "../utils/layout/layoutManager";
 interface EditorProps {
   sm: NewSelectionManager;
   dm: DragManager;

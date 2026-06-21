@@ -14,11 +14,11 @@ import type {
   DocShape,
 } from "../../types/types";
 import { layoutKey } from "../../types/types";
-import type { NewSelectionManager } from "../../selection/NewSelectionManager/NEWSelectionManager";
-import type DragManager from "../../draggable/dragManager/DragManager";
-import type BlockManager from "../workspace-blocks/blockCreator/blockManager";
-import type LayoutManager from "../../layout/layoutManager";
-import DragContainer from "../../draggable/dragContainer/DragContainer";
+import type { NewSelectionManager } from "../../utils/selection/selection/NEWSelectionManager"
+import type DragManager from "../../utils/draggable/dragManager/DragManager";
+import type BlockManager from "../blocks/blockCreator/blockManager";
+import type LayoutManager from "../../utils/layout/layoutManager";
+import DragContainer from "../../utils/draggable/dragContainer/DragContainer";
 import WorkspaceEmptyState from "./WorkspaceEmptyState";
 import {
   useWorkspacePointerBridge,

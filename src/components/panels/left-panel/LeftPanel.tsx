@@ -11,9 +11,9 @@ import type {
 } from "../../../types/types";
 import { useWorkspaceStore } from "../../../components/store/useWorkspaceStore";
 import { useBlockEventStore } from "../../../components/store/useBlockEventStore";
-import { useLayoutStore } from "../../../layout/useLayoutStore";
+import { useLayoutStore } from "../../../utils/layout/useLayoutStore";
 import { useDocumentStorage } from "../../../storage/useDocumentStorage";
-import { BLOCK_DEFINITIONS } from "../../workspace-blocks/blockCreator/blockDefinitions";
+import { BLOCK_DEFINITIONS } from "../../blocks/blockCreator/blockDefinitions";
 
 // The Blocks tile lists the shared insertable-block catalog — BlockManager reads
 // the same catalog to build whichever one is clicked, so the two never drift.

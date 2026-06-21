@@ -6,7 +6,7 @@ import type {
     TextElement,
 } from "../../types/types"
 import { layoutKey, databaseKey } from "../../types/types"
-import type { SelectionPoint } from "../NewSelectionManager/selectionState"
+import type { SelectionPoint } from "../selection/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { resolveSelectedIds } from "./selectionRange"
 

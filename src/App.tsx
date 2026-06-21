@@ -11,9 +11,9 @@ import { useAuthStore } from './auth/useAuthStore'
 import Login from './auth/Login'
 import { NewSelectionManager } from './selection/NewSelectionManager/NEWSelectionManager'
 import DragManager from './draggable/dragManager/DragManager'
-import BlockManager from './components/workspace-blocks/blockCreator/blockManager'
+import BlockManager from './components/blocks/blockCreator/blockManager'
 import LayoutManager from './layout/layoutManager'
-import DesignDemo from './design-demo/DesignDemo' // ── DEMO TOGGLE: delete this line + the block below + the design-demo folder to remove ──
+import DesignDemo from './theme/design-demo/DesignDemo' // ── DEMO TOGGLE: delete this line + the block below + the design-demo folder to remove ──
 
 // Flag is read once at module load, so it never changes mid-session → hook order stays stable.
 const SHOW_DESIGN_DEMO = new URLSearchParams(window.location.search).has('demo')

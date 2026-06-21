@@ -18,7 +18,7 @@
 //   markup, so on reload the block re-wraps, producing <p><p>...</p></p>. Within
 //   a few reloads the tree is unrecoverable.
 
-import type { TextElement } from '../../types/types'
+import type { TextElement } from '../../../types/types'
 import type { BlockType } from './types'
 import { SelectionPoint } from './SelectionPoint'
 

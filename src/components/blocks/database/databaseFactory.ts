@@ -11,7 +11,7 @@ import type {
     DbColumn,
     RowData,
     TextElement,
-} from '../types/types'
+} from '../../../types/types'
 
 
 // Height a fresh database block occupies before its real rendered height is

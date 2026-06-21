@@ -9,7 +9,7 @@
 // State: only the workspace element (handed in once on mount) so it can convert
 // a click's viewport y into content y. The document lives in the shape, in/out.
 
-import { snapToGrid, GRID_UNIT, PAGE_X } from "../../../layout/grid";
+import { snapToGrid, GRID_UNIT, PAGE_X } from "../../../utils/layout/grid";
 import {
   measuredBlockHeight,
   NEW_BLOCK_DEFAULT_W,
@@ -17,14 +17,14 @@ import {
   NEW_BLOCK_VERTICAL_GAP,
   NEW_BLOCK_TOP,
   NEW_BLOCK_CONTENT,
-} from "../../../layout/workspaceLayout";
+} from "../../../utils/layout/workspaceLayout";
 import { layoutKey, CHECKBOX_CHECKED } from "../../../types/types";
 import { useWorkspaceStore } from "../../store/useWorkspaceStore";
 import {
   makeDatabaseConfig,
   makeDatabaseRow,
   DB_BLOCK_DEFAULT_H,
-} from "../../../database/databaseFactory";
+} from "../database/databaseFactory";
 import type {
   ContentDataSet,
   LayoutDataSet,

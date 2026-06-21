@@ -2,9 +2,9 @@
 // can render a TextElement. TextElement.component is keyed against this map.
 // Add new block components here and in TextElement['component'] in types.ts.
 
-import CanvasArea from "../components/workspace-blocks/CanvasArea/CanvasArea"
-import ContentArea from "../components/workspace-blocks/ContentArea/ContentArea"
-import DatabaseArea from "../components/workspace-blocks/DatabaseArea/DatabaseArea"
+import CanvasArea from "../components/blocks/CanvasArea/CanvasArea"
+import ContentArea from "../components/blocks/ContentArea/ContentArea"
+import DatabaseArea from "../components/blocks/DatabaseArea/DatabaseArea"
 
 export const COMPONENT_REGISTRY = {
     ContentArea,

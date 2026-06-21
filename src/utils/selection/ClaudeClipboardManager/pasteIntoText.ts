@@ -7,7 +7,7 @@ import type {
     KeyEventData,
 } from "../../types/types"
 import { layoutKey } from "../../types/types"
-import type { SelectionPoint } from "../NewSelectionManager/selectionState"
+import type { SelectionPoint } from "../selection/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { freshId } from "./ids"
 import { insertIndexAfter, bottomEdgeOfAnchor, insertIntoContent } from "./pasteShared"

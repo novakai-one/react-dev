@@ -33,7 +33,7 @@ import type {
     LifecycleEventData,
     ContentDataSet,
     DocShape,
-} from '../../types/types'
+} from '../../../types/types'
 import type {
     BlockType,
     ClipboardBlockData,

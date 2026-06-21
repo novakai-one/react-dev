@@ -17,7 +17,7 @@ import type {
   KeyEventData,
   LifecycleEventData,
   DocShape,
-} from "../types/types";
+} from "../../types/types";
 import { resolveFileCollisions, orderByPosition } from "./workspaceLayout";
 
 // ── LayoutManager (class) ────────────────────────────────────────────────

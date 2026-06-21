@@ -20,8 +20,8 @@
 //   - a mouseup before the threshold is a plain click: nothing committed, no
 //     teleport guard ever engaged.
 
-import type { MouseEventData, KeyEventData, LifecycleEventData, DocShape } from '../../types/types'
-import { layoutKey } from '../../types/types'
+import type { MouseEventData, KeyEventData, LifecycleEventData, DocShape } from '../../../types/types'
+import { layoutKey } from '../../../types/types'
 
 type Position = {
     x: number
