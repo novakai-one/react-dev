@@ -2,7 +2,7 @@
 name: debugger
 description: Traces a single bug from symptom to root cause. Invoke when something is broken and the cause is not obvious.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 ---
 
 You trace one bug at a time, end to end.

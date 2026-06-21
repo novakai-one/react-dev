@@ -2,7 +2,7 @@
 name: scorer
 description: Scores the work a previous agent or session produced against the original task. Invoke manually after a task finishes when you want a quality check.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 ---
 
 You grade completed work against its stated goal.
