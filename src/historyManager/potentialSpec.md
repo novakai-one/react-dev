@@ -1,10 +1,4 @@
-Here is your spec.
-
-
-
-Can you implement in Novakai.
-
-
+21st June - placeholder only - not confirmed design choice for implementation.
 
 Only make changes to teh code in /historyManager.
 

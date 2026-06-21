@@ -20,140 +20,153 @@
 // same cbMouseEvent / cbKeyboardEvent / cbLifecycleEvent conduit WSA handed in.
 // This component decides nothing — the managers do, off the trigger string.
 
-import { useSyncExternalStore } from 'react'
-import { useWorkspaceStore } from '../../store/useWorkspaceStore'
-import ContentArea from '../ContentArea/ContentArea'
-import DatabaseRow from './DatabaseRow'
+import { useSyncExternalStore } from "react";
+import { useWorkspaceStore } from "../../store/useWorkspaceStore";
+import { CELL_REGISTRY } from "./cellRegistry";
+import DatabaseRow from "./DatabaseRow";
 import type {
-    ContentDataSet,
-    TextElement,
-    MouseEventData,
-    KeyEventData,
-    LifecycleEventData,
-} from '../../../types/types'
-import './database-area.css'
-
+  ContentDataSet,
+  TextElement,
+  MouseEventData,
+  KeyEventData,
+  LifecycleEventData,
+} from "../../../types/types";
+import "./database-area.css";
 
 interface DatabaseAreaProps {
-    activeContent: TextElement,
-    contentDataSet: ContentDataSet,
-    cbMouseEvent:     (mouseData: MouseEventData, trigger: string) => void,
-    cbKeyboardEvent:  (keyData: KeyEventData, trigger: string) => void,
-    cbLifecycleEvent: (lifecycleData: LifecycleEventData, trigger: string) => void,
+  activeContent: TextElement;
+  contentDataSet: ContentDataSet;
+  cbMouseEvent: (mouseData: MouseEventData, trigger: string) => void;
+  cbKeyboardEvent: (keyData: KeyEventData, trigger: string) => void;
+  cbLifecycleEvent: (
+    lifecycleData: LifecycleEventData,
+    trigger: string,
+  ) => void;
 }
-
 
 export default function DatabaseArea({
-    activeContent,
-    contentDataSet,
-    cbMouseEvent,
-    cbKeyboardEvent,
-    cbLifecycleEvent,
+  activeContent,
+  contentDataSet,
+  cbMouseEvent,
+  cbKeyboardEvent,
+  cbLifecycleEvent,
 }: DatabaseAreaProps) {
-    // The configuration for THIS database, keyed by the block id. Subscribed via
-    // a selector so the block re-renders when its own config changes and not when
-    // an unrelated database does.
-    const config = useWorkspaceStore(s => s.databases?.[activeContent.id] ?? null)
+  // The configuration for THIS database, keyed by the block id. Subscribed via
+  // a selector so the block re-renders when its own config changes and not when
+  // an unrelated database does.
+  const config = useWorkspaceStore(
+    (s) => s.databases?.[activeContent.id] ?? null,
+  );
 
-    // Block selection set is SM-owned; rows read it the same way WSA reads block
-    // selection. A row id can be in this set once row selection is wired.
-    const selectedIds = useSyncExternalStore(noopSubscribe, getEmptySet, getEmptySet)
+  // Block selection set is SM-owned; rows read it the same way WSA reads block
+  // selection. A row id can be in this set once row selection is wired.
+  const selectedIds = useSyncExternalStore(
+    noopSubscribe,
+    getEmptySet,
+    getEmptySet,
+  );
 
-    if (!config) {
-        // Config not loaded yet (or stripped on delete) — render an empty shell
-        // so the block still has a measurable box for the layout pass.
-        return <div className="database-area" data-blockid={activeContent.id} />
-    }
+  if (!config) {
+    // Config not loaded yet (or stripped on delete) — render an empty shell
+    // so the block still has a measurable box for the layout pass.
+    return <div className="database-area" data-blockid={activeContent.id} />;
+  }
 
-    // One grid track per column. Header and every row share this string so cells
-    // line up. Widths come from the database's internal layout.
-    const gridTemplateColumns = config.columns
-        .map(col => `${config.layout.columnWidths[col.key] ?? 200}px`)
-        .join(' ')
+  // One grid track per column. Header and every row share this string so cells
+  // line up. Widths come from the database's internal layout.
+  const gridTemplateColumns = config.columns
+    .map((col) => `${config.layout.columnWidths[col.key] ?? 200}px`)
+    .join(" ");
 
-    return (
-        <div className="database-area" data-blockid={activeContent.id}>
-            <div className="database-area__title">{config.name}</div>
+  return (
+    <div className="database-area" data-blockid={activeContent.id}>
+      <div className="database-area__title">{config.name}</div>
 
-            {/* Column headers */}
-            <div className="database-area__header" style={{ gridTemplateColumns }}>
-                {config.columns.map(col => (
-                    <div key={col.key} className="database-area__header-cell">
-                        {col.name}
-                    </div>
-                ))}
-            </div>
+      {/* Column headers */}
+      <div className="database-area__header" style={{ gridTemplateColumns }}>
+        {config.columns.map((col) => (
+          <div key={col.key} className="database-area__header-cell">
+            {col.name}
+          </div>
+        ))}
+      </div>
 
-            {/* Rows — vertical order is rowOrder. Each row is a draggable wrapper. */}
-            <div className="database-area__body">
-                {config.rowOrder.map(rowId => {
-                    const row = config.rows[rowId]
-                    if (!row) return null
-                    return (
-                        <DatabaseRow
-                            key={rowId}
-                            rowId={rowId}
-                            gridTemplateColumns={gridTemplateColumns}
-                            isSelected={selectedIds.has(rowId)}
-                            cbMouseEvent={cbMouseEvent}
-                        >
-                            {config.columns.map(col => {
-                                const cellBlockId = row.cells[col.key]
-                                const cellBlock = cellBlockId ? contentDataSet[cellBlockId] : undefined
-                                return (
-                                    <div key={col.key} className="db-row__cell">
-                                        {cellBlock && (
-                                            <ContentArea
-                                                activeContent={cellBlock}
-                                                contentDataSet={contentDataSet}
-                                                cbMouseEvent={cbMouseEvent}
-                                                cbKeyboardEvent={cbKeyboardEvent}
-                                                cbLifecycleEvent={cbLifecycleEvent}
-                                            />
-                                        )}
-                                    </div>
-                                )
-                            })}
-                        </DatabaseRow>
-                    )
-                })}
-            </div>
-
-            {/* Add-row affordance. Fires a mouse event WSA/BlockManager will own
-                later; trigger string keeps the conduit uniform. */}
-            <div
-                className="database-area__add-row"
-                onMouseDown={e => cbMouseEvent(mouseDataFrom(e, activeContent.id), 'database-add-row')}
+      {/* Rows — vertical order is rowOrder. Each row is a draggable wrapper. */}
+      <div className="database-area__body">
+        {config.rowOrder.map((rowId) => {
+          const row = config.rows[rowId];
+          if (!row) return null;
+          return (
+            <DatabaseRow
+              key={rowId}
+              rowId={rowId}
+              gridTemplateColumns={gridTemplateColumns}
+              isSelected={selectedIds.has(rowId)}
+              cbMouseEvent={cbMouseEvent}
             >
-                + New row
-            </div>
-        </div>
-    )
-}
+              {config.columns.map((col) => {
+                const cellBlockId = row.cells[col.key];
+                const cellBlock = cellBlockId
+                  ? contentDataSet[cellBlockId]
+                  : undefined;
+                // The column's type picks the renderer — a data lookup, not an
+                // outcome branch. Every renderer takes the same CellProps, so
+                // the cell stays uniform whatever the type.
+                const Cell = CELL_REGISTRY[col.type];
+                return (
+                  <div key={col.key} className="db-row__cell">
+                    {cellBlock && (
+                      <Cell
+                        cell={cellBlock}
+                        contentDataSet={contentDataSet}
+                        cbMouseEvent={cbMouseEvent}
+                        cbKeyboardEvent={cbKeyboardEvent}
+                        cbLifecycleEvent={cbLifecycleEvent}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </DatabaseRow>
+          );
+        })}
+      </div>
 
+      {/* Add-row affordance. Fires a mouse event WSA/BlockManager will own
+                later; trigger string keeps the conduit uniform. */}
+      <div
+        className="database-area__add-row"
+        onMouseDown={(e) =>
+          cbMouseEvent(mouseDataFrom(e, activeContent.id), "database-add-row")
+        }
+      >
+        + New row
+      </div>
+    </div>
+  );
+}
 
 // Shape a native mouse event into the conduit payload, tagged with the database
 // block id. Built in the body, never inline in JSX — same rule as ContentArea.
 function mouseDataFrom(e: React.MouseEvent, blockId: string): MouseEventData {
-    return {
-        clientX: e.clientX,
-        clientY: e.clientY,
-        blockId,
-        blockType: 'DatabaseArea',
-        shiftKey: e.shiftKey,
-        metaKey:  e.metaKey,
-        ctrlKey:  e.ctrlKey,
-        altKey:   e.altKey,
-        button:   e.button,
-        buttons:  e.buttons,
-        nativeEvent: e
-    }
+  return {
+    clientX: e.clientX,
+    clientY: e.clientY,
+    blockId,
+    blockType: "DatabaseArea",
+    shiftKey: e.shiftKey,
+    metaKey: e.metaKey,
+    ctrlKey: e.ctrlKey,
+    altKey: e.altKey,
+    button: e.button,
+    buttons: e.buttons,
+    nativeEvent: e,
+  };
 }
-
 
 // Placeholder selection source until row selection is wired into SM. A stable
 // empty set keeps useSyncExternalStore happy (same reference every call) so it
 // never loops. Swap getEmptySet for SM's row-selection snapshot when it exists.
-const EMPTY_SET: Set<string> = new Set()
-const getEmptySet = (): Set<string> => EMPTY_SET
-const noopSubscribe = (): (() => void) => () => {}
+const EMPTY_SET: Set<string> = new Set();
+const getEmptySet = (): Set<string> => EMPTY_SET;
+const noopSubscribe = (): (() => void) => () => {};

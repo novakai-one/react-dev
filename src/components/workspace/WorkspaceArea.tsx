@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
 import { useDocumentStorage } from '../../storage/useDocumentStorage'
 import { COMPONENT_REGISTRY, type ComponentRegistryKey } from '../../types/registry'
@@ -34,6 +34,20 @@ function buildRoots(nodes: TextElement[]): TextElement[] {
 }
 
 
+// Put the caret inside a contentEditable at its start or end. Used after a
+// structural change re-renders, so the freshly created block is focused and
+// ready to type into. Pure DOM — the only place WSA writes the native caret.
+function placeCaret(el: HTMLElement, edge: "start" | "end"): void {
+    el.focus()
+    const range = document.createRange()
+    range.selectNodeContents(el)
+    range.collapse(edge === "start")   // true = collapse to start
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+}
+
+
 export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     // Selectors instead of a full-state destructure — keeps WSA out of the
     // re-render loop when unrelated fields change.
@@ -47,7 +61,25 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     // Which blocks are selected. SM writes the selection snapshot into the
     // committed shape; WSA reads the block-id list straight off the store and
     // passes the flag down to each DragContainer. No SM subscription.
+    //21st June -> potential fix here at some stage. WSA only one setting and subscribing.
     const selectedBlockIds = useWorkspaceStore(s => s.selection.selectedBlockIds)
+
+    // Caret target after a structural change (Enter create, Backspace delete).
+    // BlockManager sets it; this component places the caret once the new DOM has
+    // rendered, then clears it. selectedBlockIds is the block-highlight channel —
+    // it carries no caret, so focus lives here, not there.
+    const pendingFocus    = useWorkspaceStore(s => s.pendingFocus)
+    const setPendingFocus = useWorkspaceStore(s => s.setPendingFocus)
+
+    // needs to be renamed into a named function to describe intent not just useLayoutEffect.
+    useLayoutEffect(() => {
+        if (!pendingFocus) return
+        const editable = wsaRef.current?.querySelector<HTMLElement>(
+            `[data-blockid="${pendingFocus.id}"][contenteditable="true"]`,
+        )
+        if (editable) placeCaret(editable, pendingFocus.edge)
+        setPendingFocus(null)
+    }, [pendingFocus, setPendingFocus])
 
 
     // ── Commit: write the shape back, let React diff ─────────────────────────
@@ -76,6 +108,11 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
         const updatedFiles: FilesDataSet = { ...state.files, [shape.file.id]: shape.file }
         saveDocument(updatedFiles, shape.contentData, shape.layoutData, shape.databaseData)
         setDataSet(updatedFiles, shape.contentData, shape.layoutData, shape.databaseData)
+        // activeFile drives the rendered root list. setDataSet refreshes files and
+        // content but not activeFile, so without this the stale activeFile.content
+        // omits a freshly created block id (create never renders) while a deleted
+        // id survives only because its content entry is gone (filter drops it).
+        state.setActiveFile(shape.file)
         state.setSelection(shape.selection)
     }, [saveDocument, setDataSet])
 
@@ -83,9 +120,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     // ── The conduit: one router, one uniform shape, every helper ─────────────
     // WSA reads its rendered store state into a DocShape, threads it through
     // every helper in a fixed order, and commits whatever comes out. WSA makes
-    // NO decision — each helper switches on the trigger and either acts or
-    // returns the shape untouched. Order: BlockManager creates/deletes, SM
-    // adjusts selection/caret, DM handles drag, LayoutManager tidies last.
+    // NO decisions.
     const route = useCallback((
         channel: 'mouse' | 'key' | 'lifecycle',
         data: MouseEventData | KeyEventData | LifecycleEventData,
@@ -104,8 +139,6 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
 
         if (channel === 'mouse') {
             const d = data as MouseEventData
-            
-            
             shape = bm.receiveMouseEvent(d, trigger, shape)
             shape = sm.receiveMouseEvent(d, trigger, shape)
             shape = dm.receiveMouseEvent(d, trigger, shape)

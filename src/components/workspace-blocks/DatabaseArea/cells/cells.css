@@ -1,0 +1,10 @@
+/* Typed cell renderers (CELL_REGISTRY). Text-like cells render through
+   ContentArea and inherit .db-cell chrome; only non-text gestures need styling
+   of their own. */
+
+/* Checkbox cell — centred in its grid cell, accent-tinted to match selection. */
+.db-checkbox-cell {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent-border, #4a90d9);
+}

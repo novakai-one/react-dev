@@ -84,10 +84,13 @@ export default function ContentArea({
 
     // Keep the placeholder in sync as the user types. textContent (not innerText)
     // is the cheap read here; we only care whether anything is there.
+    // Also fires the lifecycle conduit with "content-area-input" so BlockManager
+    // commits the live text to the store on every keystroke.
     const handleInput = () => {
         if (!isLeaf) return
         const text = contentRef.current?.textContent ?? ''
         setIsEmpty(text.length === 0)
+        handleLifecycleEvent("content-area-input")
     }
 
 
@@ -165,7 +168,7 @@ export default function ContentArea({
                     const childNode = contentDataSet[child]
                     return (
                         <ContentArea
-                            key={child}
+                            
                             activeContent={childNode}
                             contentDataSet={contentDataSet}
                             cbMouseEvent={cbMouseEvent}

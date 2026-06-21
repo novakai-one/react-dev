@@ -1,5 +1,4 @@
-import type { ReactNode } from "react"
-
+import type { ReactNode } from "react";
 
 // ── Event family payloads ────────────────────────────────────────────────
 // Co-located here (not in SelectionManager.ts) so components and DragManager
@@ -16,36 +15,35 @@ import type { ReactNode } from "react"
 // would still break preventDefault).
 
 export type MouseEventData = {
-    clientX: number,
-    clientY: number,
-    blockId: string, // simpler to make this an extension of Lifecycle and send these two up each time.
-    blockType: string, //this should be updated to actual type for component_registry
-    shiftKey: boolean,
-    metaKey: boolean,
-    ctrlKey: boolean,
-    altKey: boolean,
-    button: number,
-    buttons: number,
-    nativeEvent: React.MouseEvent | MouseEvent | null, // MouseEvent for native addEventListener
-}
+  clientX: number;
+  clientY: number;
+  blockId: string; // simpler to make this an extension of Lifecycle and send these two up each time.
+  blockType: string; //this should be updated to actual type for component_registry
+  shiftKey: boolean;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  altKey: boolean;
+  button: number;
+  buttons: number;
+  nativeEvent: React.MouseEvent | MouseEvent | null; // MouseEvent for native addEventListener
+};
 
 export type KeyEventData = {
-    key: string,
-    shiftKey: boolean,
-    metaKey: boolean,
-    ctrlKey: boolean,
-    altKey: boolean,
-    blockId: string,
-    blockType: string,
-    offset: number, // caret offset inside the block's text at the time the key fired (-1 when unknown)
-    nativeEvent: React.KeyboardEvent,
-}
+  key: string;
+  shiftKey: boolean;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  altKey: boolean;
+  blockId: string;
+  blockType: string;
+  offset: number; // caret offset inside the block's text at the time the key fired (-1 when unknown)
+  nativeEvent: React.KeyboardEvent;
+};
 
 export type LifecycleEventData = {
-    blockId: string,
-    blockType: string,
-}
-
+  blockId: string;
+  blockType: string;
+};
 
 // ── Block events ─────────────────────────────────────────────────────────
 // The ONE object passed around for structural gestures (create / delete).
@@ -60,27 +58,27 @@ export type LifecycleEventData = {
 // payload  — gesture-specific extras only the source can supply (the typed text,
 //            the clicked/dropped coordinates, the chosen spec, the pasted blocks).
 export type BlockTrigger =
-    | "enter"                   // split a new block below the source
-    | "canvas-click"            // drop a fresh block on the clicked row
-    | "block-panel-selection"   // insert the panel's chosen block at the bottom
-    | "delete"                  // remove an empty block, close the hole
-    | "content-refresh"         // persist a block's edited text (no layout change)
-    | "clipboard-paste"         // insert the pasted blocks below the anchor
-    | "drop"                    // a drag ended — move the block's placement
+  | "enter" // split a new block below the source
+  | "canvas-click" // drop a fresh block on the clicked row
+  | "block-panel-selection" // insert the panel's chosen block at the bottom
+  | "delete" // remove an empty block, close the hole
+  | "content-refresh" // persist a block's edited text (no layout change)
+  | "clipboard-paste" // insert the pasted blocks below the anchor
+  | "drop"; // a drag ended — move the block's placement
 
 export interface BlockEventPayload {
-    value?: string,                  // enter / content-refresh: the block's current text
-    tag?: TextElement['Tag'],        // enter / content-refresh: the block's tag
-    x?: number,                      // drop: workspace-local x the block landed at
-    y?: number,                      // canvas-click / drop: workspace-local row
-    spec?: BlockSpec,                // block-panel-selection: which block to insert
-    blocks?: ClipboardBlockData[],   // clipboard-paste: the blocks being pasted
+  value?: string; // enter / content-refresh: the block's current text
+  tag?: TextElement["Tag"]; // enter / content-refresh: the block's tag
+  x?: number; // drop: workspace-local x the block landed at
+  y?: number; // canvas-click / drop: workspace-local row
+  spec?: BlockSpec; // block-panel-selection: which block to insert
+  blocks?: ClipboardBlockData[]; // clipboard-paste: the blocks being pasted
 }
 
 export interface BlockEvent {
-    trigger: BlockTrigger,
-    callerId: string,
-    payload?: BlockEventPayload,
+  trigger: BlockTrigger;
+  callerId: string;
+  payload?: BlockEventPayload;
 }
 
 // One entry per block in a structured clipboard payload. Lives here (not in
@@ -90,28 +88,26 @@ export interface BlockEvent {
 //   tag:    the contentEditable element's tag name (p, h1, h2, …).
 //   layout: optional saved geometry snapshot (preserved on internal paste).
 export type ClipboardBlockData = {
-    html: string,
-    tag: string,
-    layout?: LayoutData,
-}
+  html: string;
+  tag: string;
+  layout?: LayoutData;
+};
 
 // What LayoutManager does with the proposed layout: push overlaps down after an
 // add, or pull blocks up to close the hole after a delete.
-export type LayoutChangeMode = "add" | "delete"
-
+export type LayoutChangeMode = "add" | "delete";
 
 // ── Layout preferences ───────────────────────────────────────────────────
 // How wide the workspace canvas may grow. "full" removes the cap. Used by the
 // layout store and the right-panel Layout control.
-export type PageWidth = "narrow" | "normal" | "full"
-
+export type PageWidth = "narrow" | "normal" | "full";
 
 // ── Document model ───────────────────────────────────────────────────────
 
 export interface MetaData {
-    dateCreated: string,
-    author?: string,
-    lastEdited?: string,
+  dateCreated: string;
+  author?: string;
+  lastEdited?: string;
 }
 
 // One renderable block in the document — content only.
@@ -120,65 +116,74 @@ export interface MetaData {
 // children: a flat list of child block ids — supports future nesting; currently null.
 // Position/size now live in LayoutItem (see Layout section), not on the block.
 export interface TextElement {
-    id: string, // a.k.a. blockId
-    component: "ContentArea" | "CanvasArea" | "DatabaseArea",
-    Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "p" | "span" | "ol" | "ul" | "li" | "div" | "blockquote",
-    styles: string,
-    classNames: string,
-    innerContent: string,
-    parentId: string | null,
-    children: string[] | null,
-    files: string[],
+  id: string; // a.k.a. blockId
+  component: "ContentArea" | "CanvasArea" | "DatabaseArea";
+  Tag:
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "p"
+    | "span"
+    | "ol"
+    | "ul"
+    | "li"
+    | "div"
+    | "blockquote";
+  styles: string;
+  classNames: string;
+  innerContent: string;
+  parentId: string | null;
+  children: string[] | null;
+  files: string[];
 }
-
 
 // ── Panel tile shapes ────────────────────────────────────────────────────
 
-export type PanelTile = FilePanelTile | BlockPanelTile
+export type PanelTile = FilePanelTile | BlockPanelTile;
 
 export interface FilePanelTile {
-    type: "files",
-    tileName: "Files",
-    panelBody: FileData[],
+  type: "files";
+  tileName: "Files";
+  panelBody: FileData[];
 }
 
 // A Blocks-tile entry. Clicking one inserts a real TextElement into the active
 // file, rendered by `component` (currently ContentArea) using the semantic `Tag`.
 export interface BlockSpec {
-    id: string,
-    block: string,                              // label shown in the panel
-    component: "ContentArea" | "CanvasArea" | "DatabaseArea",
-    Tag: TextElement['Tag'],
-    classNames?: string,
+  id: string;
+  block: string; // label shown in the panel
+  component: "ContentArea" | "CanvasArea" | "DatabaseArea";
+  Tag: TextElement["Tag"];
+  classNames?: string;
 }
 
 export interface BlockPanelTile {
-    type: "blocks",
-    tileName: "Blocks",
-    panelBody: BlockSpec[],
+  type: "blocks";
+  tileName: "Blocks";
+  panelBody: BlockSpec[];
 }
-
 
 // ── Document containers ──────────────────────────────────────────────────
 
-export type ContentDataSet = Record<string, TextElement>
-export type FilesDataSet   = Record<string, FileData>
+export type ContentDataSet = Record<string, TextElement>;
+export type FilesDataSet = Record<string, FileData>;
 
 export type FileData = {
-    id: string,
-    metaData: MetaData,
-    tags: string[],
-    fileName: string,
-    content: string[],   // ordered list of block ids — looked up in ContentDataSet
-}
+  id: string;
+  metaData: MetaData;
+  tags: string[];
+  fileName: string;
+  content: string[]; // ordered list of block ids — looked up in ContentDataSet
+};
 
 export type DataSet = {
-    files: FilesDataSet,
-    content: ContentDataSet,
-    layouts: LayoutDataSet,
-    databases: DatabaseDataSet,
-}
-
+  files: FilesDataSet;
+  content: ContentDataSet;
+  layouts: LayoutDataSet;
+  databases: DatabaseDataSet;
+};
 
 // ── Layout / placement ───────────────────────────────────────────────────
 // The "where". Split out of TextElement so one block can sit in many places.
@@ -187,10 +192,10 @@ export type DataSet = {
 // sit at any position (canvas-ready). The grid is a snapping policy applied by
 // LayoutManager, not a property of this shape.
 export interface LayoutData {
-    x: number,
-    y: number,
-    w: number,
-    h: number,
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 // A LayoutItem is ONE placement of ONE block on ONE file's canvas — its own
@@ -198,17 +203,17 @@ export interface LayoutData {
 // blockId can have many LayoutItems → the block renders in many files.
 // Stored in LayoutDataSet keyed by layoutKey(fileId, blockId).
 export interface LayoutItem extends LayoutData {
-    blockId: string,          // the TextElement this placement renders
-    fileId: string,           // the file/canvas this placement lives on
-    // Container behaviour overrides — DragContainer defaults all to true.
-    // Geometry (x/y/w/h, inherited above) was the only thing ever persisted
-    // before; these let you save per-placement drag/resize/lock state later.
-    resizable?: boolean,
-    draggable?: boolean,
-    locked?: boolean,
+  blockId: string; // the TextElement this placement renders
+  fileId: string; // the file/canvas this placement lives on
+  // Container behaviour overrides — DragContainer defaults all to true.
+  // Geometry (x/y/w/h, inherited above) was the only thing ever persisted
+  // before; these let you save per-placement drag/resize/lock state later.
+  resizable?: boolean;
+  draggable?: boolean;
+  locked?: boolean;
 }
 
-export type LayoutDataSet = Record<string, LayoutItem>
+export type LayoutDataSet = Record<string, LayoutItem>;
 
 // ── Selection snapshot ─────────────────────────────────────────────────
 // The selection result carried INSIDE the shape, so every conduit helper and
@@ -220,17 +225,17 @@ export type LayoutDataSet = Record<string, LayoutItem>
 //   caret            — where the caret should sit: a block id + text offset.
 //                      null when there is no caret to place (e.g. pure range).
 export interface CaretTarget {
-    blockId: string,
-    offset: number,
+  blockId: string;
+  offset: number;
 }
 
 export interface SelectionSnapshot {
-    selectedBlockIds: string[],
-    caret: CaretTarget | null,
+  selectedBlockIds: string[];
+  caret: CaretTarget | null;
 }
 
 export function emptySelectionSnapshot(): SelectionSnapshot {
-    return { selectedBlockIds: [], caret: null }
+  return { selectedBlockIds: [], caret: null };
 }
 
 // ── Conduit shape ──────────────────────────────────────────────────────
@@ -241,19 +246,18 @@ export function emptySelectionSnapshot(): SelectionSnapshot {
 // reaching into the store. `selection` rides along so selected blocks + caret
 // travel with the document instead of through a separate store.
 export interface DocShape {
-    file:        FileData | null,
-    contentData: ContentDataSet,
-    layoutData:  LayoutDataSet,
-    databaseData: DatabaseDataSet,
-    selection:   SelectionSnapshot,
+  file: FileData | null;
+  contentData: ContentDataSet;
+  layoutData: LayoutDataSet;
+  databaseData: DatabaseDataSet;
+  selection: SelectionSnapshot;
 }
 
 // Composite key so one block can be placed in many files without collisions.
 // (Same block twice in the SAME file would need a unique placement id instead —
 //  a later step, since selection + the DOM currently key off blockId.)
 export const layoutKey = (fileId: string, blockId: string): string =>
-    `${fileId}:${blockId}`
-
+  `${fileId}:${blockId}`;
 
 // ── Database model ───────────────────────────────────────────────────────
 // A database block is the same kind of dumb renderer as a text block: a
@@ -271,16 +275,15 @@ export const layoutKey = (fileId: string, blockId: string): string =>
 // Three objects, one job each. No object holds raw cell text — cells are
 // ordinary TextElement records in ContentDataSet, reached by id.
 
-
 // One column in a database's schema. `key` is the stable id a RowData cell map
 // is keyed by; `name` is the human label shown in the header. `type` is the
 // cell's value kind — drives rendering/validation later; "text" for now.
-export type DbColumnType = "text" | "number" | "date" | "select" | "checkbox"
+export type DbColumnType = "text" | "number" | "date" | "select" | "checkbox";
 
 export interface DbColumn {
-    key: string,            // stable id — RowData.cells is keyed by this
-    name: string,           // header label
-    type: DbColumnType,     // value kind (rendering/validation come later)
+  key: string; // stable id — RowData.cells is keyed by this
+  name: string; // header label
+  type: DbColumnType; // value kind (rendering/validation come later)
 }
 
 // Per-database geometry. Extends the same pure-geometry shape a block placement
@@ -289,7 +292,7 @@ export interface DbColumn {
 // normal placement); this is the database's INTERNAL layout — column widths and
 // any future per-database view geometry.
 export interface DbLayoutData extends LayoutData {
-    columnWidths: Record<string, number>,   // keyed by DbColumn.key — px width
+  columnWidths: Record<string, number>; // keyed by DbColumn.key — px width
 }
 
 // One row. Holds NO raw content — `cells` maps a column key to the TextElement
@@ -297,8 +300,8 @@ export interface DbLayoutData extends LayoutData {
 // editable by the same SM/contentEditable path every other block uses. `id` is
 // the row's own id (a row is independently draggable, so it needs identity).
 export interface RowData {
-    id: string,                          // the row's own id (draggable target)
-    cells: Record<string, string>,       // column key → TextElement id (the cell)
+  id: string; // the row's own id (draggable target)
+  cells: Record<string, string>; // column key → TextElement id (the cell)
 }
 
 // The "file" of a database: its schema + identity, plus pointers to its layout
@@ -311,41 +314,65 @@ export interface RowData {
 // rowOrder at render. Both are optional: a database with neither shows rows in
 // rowOrder as-is.
 export interface DatabaseConfiguration {
-    id: string,                  // matches the DatabaseArea block id
-    name: string,                // database label
-    columns: DbColumn[],         // the schema
-    rows: Record<string, RowData>,   // row id → row (cells point to content)
-    rowOrder: string[],          // the vertical order of row ids (drag reorders this)
-    layout: DbLayoutData,        // internal geometry (column widths)
-    sort?: DbSort,               // configured sort (recomputed over rowOrder)
-    filters?: DbFilter[],        // configured filters (recomputed over rowOrder)
+  id: string; // matches the DatabaseArea block id
+  name: string; // database label
+  columns: DbColumn[]; // the schema
+  rows: Record<string, RowData>; // row id → row (cells point to content)
+  rowOrder: string[]; // the vertical order of row ids (drag reorders this)
+  layout: DbLayoutData; // internal geometry (column widths)
+  sort?: DbSort; // configured sort (recomputed over rowOrder)
+  filters?: DbFilter[]; // configured filters (recomputed over rowOrder)
 }
 
 // Configured sort: which column, which direction. Applied over rowOrder at
 // render — rowOrder itself is never mutated by a sort, only by an explicit drag.
 export interface DbSort {
-    columnKey: string,
-    direction: "asc" | "desc",
+  columnKey: string;
+  direction: "asc" | "desc";
 }
 
 // One configured filter clause. `op` is the comparison; `value` the operand.
 // Kept deliberately small — extend the op set as real filtering lands.
 export interface DbFilter {
-    columnKey: string,
-    op: "equals" | "contains" | "empty" | "not-empty",
-    value?: string,
+  columnKey: string;
+  op: "equals" | "contains" | "empty" | "not-empty";
+  value?: string;
 }
 
 // All databases in the document, keyed by the DatabaseArea block id (NOT by a
 // separate database id — one database block == one configuration, so the block
 // id is the key, mirroring how LayoutDataSet keys by placement).
-export type DatabaseDataSet = Record<string, DatabaseConfiguration>
+export type DatabaseDataSet = Record<string, DatabaseConfiguration>;
 
 // Composite key helper kept for symmetry with layoutKey. A database is keyed by
 // its block id alone today; this exists so call sites read the same way and a
 // future per-file database instance can slot in without churn.
-export const databaseKey = (blockId: string): string => blockId
+export const databaseKey = (blockId: string): string => blockId;
 
+// ── Cell renderer contract ───────────────────────────────────────────────
+// The uniform prop shape every typed cell renderer receives. A renderer is
+// chosen by column type via CELL_REGISTRY; keeping these props uniform is what
+// lets DatabaseArea fan out to ANY renderer without branching on the type
+// (rule 1.2) — the same role MouseEventData plays for the mouse conduit.
+//   cell — the TextElement backing this cell; its innerContent is the value.
+// The three callbacks are the same conduit every block forwards through, so a
+// cell decides nothing: it shapes a payload + trigger and hands it off.
+export interface CellProps {
+  cell: TextElement;
+  contentDataSet: ContentDataSet;
+  cbMouseEvent: (mouseData: MouseEventData, trigger: string) => void;
+  cbKeyboardEvent: (keyData: KeyEventData, trigger: string) => void;
+  cbLifecycleEvent: (
+    lifecycleData: LifecycleEventData,
+    trigger: string,
+  ) => void;
+}
+
+// A checkbox cell stores its boolean as the cell block's innerContent: this
+// literal when checked, "" when unchecked. Lives here as the shared encoding
+// contract so the renderer (reads it) and BlockManager (writes it on toggle)
+// agree without one importing the other.
+export const CHECKBOX_CHECKED = "true";
 
 // ── Drag-container ───────────────────────────────────────────────────────
 
@@ -353,19 +380,19 @@ export const databaseKey = (blockId: string): string => blockId
 // the active drag target?". Declared structurally here so types.ts depends on
 // nothing (DragManager satisfies this shape without types importing it).
 export interface DragTargetQuery {
-    isDragging: (blockId: string) => boolean,
+  isDragging: (blockId: string) => boolean;
 }
 
 export interface DragContainerProps {
-    id: string,
-    children: ReactNode,
-    // The conduit — DragContainer forwards raw mouse data + trigger, never decides.
-    cbMouseEvent: (mouseData: MouseEventData, trigger: string) => void,
-    // Block-selection flag — WSA reads it off the committed shape's selection.
-    isSelected?: boolean,
-    // The placement's geometry for this block in the active file. Optional only
-    // while a block is first being placed (before its LayoutItem exists).
-    layoutData?: LayoutData,
-    // Lets the container yield `top` ownership to DM during an active drag.
-    dm?: DragTargetQuery,
+  id: string;
+  children: ReactNode;
+  // The conduit — DragContainer forwards raw mouse data + trigger, never decides.
+  cbMouseEvent: (mouseData: MouseEventData, trigger: string) => void;
+  // Block-selection flag — WSA reads it off the committed shape's selection.
+  isSelected?: boolean;
+  // The placement's geometry for this block in the active file. Optional only
+  // while a block is first being placed (before its LayoutItem exists).
+  layoutData?: LayoutData;
+  // Lets the container yield `top` ownership to DM during an active drag.
+  dm?: DragTargetQuery;
 }
