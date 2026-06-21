@@ -45,42 +45,7 @@ export type LifecycleEventData = {
   blockType: string;
 };
 
-// ── Block events ─────────────────────────────────────────────────────────
-// The ONE object passed around for structural gestures (create / delete).
-// Same shape goes to BlockManager and LayoutManager so the message never
-// changes hands mid-chain (no "broken telephone"): every consumer reads the
-// trigger + the caller's id, never a reshaped copy.
-//
-// trigger  — the human-readable gesture name (see BlockTrigger).
-// callerId — the id of the thing that fired it: the source block for "enter",
-//            the block under the caret for "delete"/"content-refresh", the
-//            dragged block for "drop", the panel spec for "block-panel-selection".
-// payload  — gesture-specific extras only the source can supply (the typed text,
-//            the clicked/dropped coordinates, the chosen spec, the pasted blocks).
-export type BlockTrigger =
-  | "enter" // split a new block below the source
-  | "canvas-click" // drop a fresh block on the clicked row
-  | "block-panel-selection" // insert the panel's chosen block at the bottom
-  | "delete" // remove an empty block, close the hole
-  | "content-refresh" // persist a block's edited text (no layout change)
-  | "clipboard-paste" // insert the pasted blocks below the anchor
-  | "drop"; // a drag ended — move the block's placement
-
-export interface BlockEventPayload {
-  value?: string; // enter / content-refresh: the block's current text
-  tag?: TextElement["Tag"]; // enter / content-refresh: the block's tag
-  x?: number; // drop: workspace-local x the block landed at
-  y?: number; // canvas-click / drop: workspace-local row
-  spec?: BlockSpec; // block-panel-selection: which block to insert
-  blocks?: ClipboardBlockData[]; // clipboard-paste: the blocks being pasted
-}
-
-export interface BlockEvent {
-  trigger: BlockTrigger;
-  callerId: string;
-  payload?: BlockEventPayload;
-}
-
+// ── Clipboard payload ──────────────────────────────────────────────────────
 // One entry per block in a structured clipboard payload. Lives here (not in
 // SelectionManager) so it's part of the shared event vocabulary BlockManager
 // reads — the same reason the mouse/key payloads sit in this file.

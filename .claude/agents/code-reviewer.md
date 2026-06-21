@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Reviews a diff before commit. Flags bugs, type holes, and React anti-patterns. Invoke after a change is staged or written.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 ---
 
 You review code changes for a TS/React/Vite project.

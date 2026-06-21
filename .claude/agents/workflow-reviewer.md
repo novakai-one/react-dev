@@ -2,7 +2,7 @@
 name: workflow-reviewer
 description: Reviews your prompt log and git history to find recurring friction and suggest config improvements. Invoke weekly, not per-task.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 ---
 
 You review how the developer works, not the code itself.

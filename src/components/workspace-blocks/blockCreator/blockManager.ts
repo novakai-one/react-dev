@@ -35,8 +35,10 @@ import type {
   MouseEventData,
   KeyEventData,
   LifecycleEventData,
+  BlockSpec,
   DocShape,
 } from "../../../types/types";
+import { findBlockDefinition } from "./blockDefinitions";
 
 export default class BlockManager {
   private _wsaEl: HTMLElement | null = null;
@@ -54,6 +56,8 @@ export default class BlockManager {
     switch (trigger) {
       case "workspace-click":
         return this._createAtClick(mouseData, shape);
+      case "left-panel-block-mouse-click":
+        return this._createFromPanel(mouseData, shape);
       case "database-add-row":
         return this._addRow(mouseData, shape);
       case "database-cell-toggle":
@@ -69,9 +73,9 @@ export default class BlockManager {
     shape: DocShape,
   ): DocShape => {
     if (trigger !== "keydown") return shape;
-    // Temporary insert trigger: Cmd/Ctrl+Shift+D drops a database below.
-    // Uses the existing key conduit (the panel block-event path isn't wired
-    // in this build). Replace with a panel/omni-input selection later.
+    // Keyboard shortcut: Cmd/Ctrl+Shift+D drops a database below. The panel now
+    // offers the same insert (left-panel-block-mouse-click → _createFromPanel);
+    // this shortcut is the keyboard route to the identical createDatabase call.
     if (
       (keyData.metaKey || keyData.ctrlKey) &&
       keyData.shiftKey &&
@@ -98,6 +102,56 @@ export default class BlockManager {
     if (trigger !== "content-area-blur" && trigger !== "content-area-input")
       return shape;
     return this._commitText(data, shape);
+  };
+
+  // ── Panel click → insert the chosen block ────────────────────────────────
+  // The click carries the catalog id in blockId (the panel had no real block to
+  // tag, so it names WHAT to create — mirroring how workspace-click carries the
+  // file id). We resolve it to its spec and route: a database is its own
+  // three-part build (createDatabase); every other component is a plain block
+  // dropped at the bottom of the active file. The "text vs database" choice
+  // lives here, never in WSA.
+  private _createFromPanel = (
+    mouseData: MouseEventData,
+    shape: DocShape,
+  ): DocShape => {
+    const spec: BlockSpec | undefined = findBlockDefinition(mouseData.blockId);
+    if (!spec) return shape;
+    if (spec.component === "DatabaseArea") return this.createDatabase(shape);
+    return this._createAtBottom(spec, shape);
+  };
+
+  // ── Panel insert → a fresh block at the bottom of the active file ────────
+  // Mirrors createDatabase's single-column drop: place below everything, append
+  // to content order. Geometry comes from the spec (component + semantic tag).
+  private _createAtBottom = (spec: BlockSpec, shape: DocShape): DocShape => {
+    if (!shape.file) return shape;
+    const fileId = shape.file.id;
+
+    const newId = crypto.randomUUID();
+    const block = makeBlock(
+      newId,
+      spec.component,
+      spec.Tag,
+      "",
+      spec.classNames ?? "",
+    );
+
+    const lowestY = lowestPlacedBottom(fileId, shape.layoutData);
+    const y = snapToGrid(lowestY + NEW_BLOCK_VERTICAL_GAP);
+    const placement: LayoutItem = {
+      blockId: newId,
+      fileId,
+      x: PAGE_X,
+      y,
+      w: NEW_BLOCK_DEFAULT_W,
+      h: GRID_UNIT,
+    };
+
+    return this._addBlock(shape, block, placement, [
+      ...shape.file.content,
+      newId,
+    ]);
   };
 
   // ── Commit the block's live DOM text into the model ──────────────────────
