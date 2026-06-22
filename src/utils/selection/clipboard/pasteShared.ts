@@ -1,5 +1,5 @@
-import type { DocShape, FileData } from "../../types/types"
-import { layoutKey } from "../../types/types"
+import type { DocShape, FileData } from "../../../types/types"
+import { layoutKey } from "../../../types/types"
 
 // Shared paste helpers used by BOTH the text-paste and block-paste modules.
 // Pure: never mutate the input shape. The paste router and the two paste

@@ -15,17 +15,17 @@ import type {
 } from "../../types/types";
 import { layoutKey } from "../../types/types";
 import type { NewSelectionManager } from "../../utils/selection/selection/NEWSelectionManager"
-import type DragManager from "../../utils/draggable/dragManager/DragManager";
+import type DragManager from "../../components/blocks/draggable/dragManager/DragManager";
 import type BlockManager from "../blocks/blockManager/blockManager";
 import type LayoutManager from "../../utils/layout/layoutManager";
-import DragContainer from "../../utils/draggable/dragContainer/DragContainer";
+import DragContainer from "../../components/blocks/draggable/dragContainer/DragContainer";
 import WorkspaceEmptyState from "./WorkspaceEmptyState";
 import {
   useWorkspacePointerBridge,
   mouseEventDataFrom,
-} from "./useWorkspacePointerBridge";
-import { usePanelEventBridge } from "./usePanelEventBridge";
-import "./workspace.css";
+} from "./modules/useWorkspacePointerBridge";
+import { usePanelEventBridge } from "./modules/usePanelEventBridge";
+import "./styles/workspace.css";
 
 interface WorkspaceAreaProps {
   sm: NewSelectionManager;

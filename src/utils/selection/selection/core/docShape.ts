@@ -12,6 +12,6 @@ export type {
     TextElement,
     SelectionSnapshot,
     CaretTarget,
-} from "../../types/types";
+} from "../../../../types/types";
 
-export { emptySelectionSnapshot } from "../../types/types";
+export { emptySelectionSnapshot } from "../../../../types/types";

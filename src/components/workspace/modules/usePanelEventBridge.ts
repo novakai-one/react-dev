@@ -15,7 +15,7 @@
 // (no container imports the block-event store) is never violated.
 
 import { useEffect } from "react";
-import { useBlockEventStore } from "../store/useBlockEventStore";
+import { useBlockEventStore } from "../../store/useBlockEventStore";
 import type { MouseEventData } from "../../types/types";
 
 type ForwardMouse = (data: MouseEventData, trigger: string) => void;

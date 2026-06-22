@@ -4,8 +4,8 @@ import type {
     LayoutDataSet,
     DatabaseDataSet,
     FileData,
-} from "../../types/types"
-import { layoutKey, databaseKey } from "../../types/types"
+} from "../../../types/types"
+import { layoutKey, databaseKey } from "../../../types/types"
 import type { SelectionPoint } from "../selection/core/selectionState"
 import { clipboardStore } from "./clipboardStore"
 import { buildSlice } from "./copy"

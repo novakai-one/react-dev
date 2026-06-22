@@ -9,7 +9,7 @@
 // collision pass needs a fresh measurement to keep blocks flush.
 
 import { GRID_UNIT, rowsForHeight, heightForRows, snapToGrid } from '../grid/grid'
-import { resolveCollisions } from './collisionManager'
+import { resolveCollisions } from '../collision-manager/collisionManager'
 import { layoutKey } from '../../../types/types'
 import type { LayoutDataSet, LayoutItem } from '../../../types/types'
 

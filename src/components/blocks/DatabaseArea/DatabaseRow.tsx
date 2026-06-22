@@ -11,7 +11,7 @@
 // Dumb wrapper: forwards the conduit, renders the handle and the row's cells.
 // Owns no logic and no row state.
 
-import DragHandle from '../../../utils/draggable/dragHandle/DragHandle'
+import DragHandle from '../draggable/dragHandle/DragHandle'
 import type { MouseEventData } from '../../../types/types'
 import type { ReactNode } from 'react'
 

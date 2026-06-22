@@ -5,8 +5,8 @@ import type {
     LayoutItem,
     TextElement,
     DatabaseConfiguration,
-} from "../../types/types"
-import { layoutKey, databaseKey } from "../../types/types"
+} from "../../../types/types"
+import { layoutKey, databaseKey } from "../../../types/types"
 import type { ClipboardSlice } from "./clipboardStore"
 
 // Re-keys a clipboard slice so its blocks can be pasted into `fileId`.
