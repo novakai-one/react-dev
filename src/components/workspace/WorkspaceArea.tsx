@@ -11,10 +11,12 @@ import type {
   KeyEventData,
   LifecycleEventData,
   FilesDataSet,
-  DocShape,
+  SelectionSnapshot,
+  DocDraft,
 } from "../../types/types";
-import { layoutKey } from "../../types/types";
-import type { NewSelectionManager } from "../../utils/selection/selection/NEWSelectionManager"
+import { layoutKey, buildDraft } from "../../types/types";
+import type { TriggerWord } from "../../types/trigger-words";
+import type { NewSelectionManager } from "../../utils/selection/selection/NEWSelectionManager";
 import type DragManager from "../../components/blocks/draggable/dragManager/DragManager";
 import type BlockManager from "../blocks/blockManager/blockManager";
 import type LayoutManager from "../../utils/layout/layoutManager";
@@ -68,6 +70,8 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
   const selectedBlockIds = useWorkspaceStore(
     (s) => s.selection.selectedBlockIds,
   );
+  const databases = useWorkspaceStore((s) => s.databases);
+  const selection = useWorkspaceStore((s) => s.selection);
 
   // Caret target after a structural change (Enter create, Backspace delete).
   // BlockManager sets it; this component places the caret once the new DOM has
@@ -90,48 +94,58 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
   // If no helper changed anything the references match the store and we skip
   // the write.
   const commit = useCallback(
-    (shape: DocShape): void => {
+    (draft: DocDraft): void => {
+      const ds = draft.dataSet;
+      const file = ds.fileData.proposed ?? ds.fileData.currentReadOnly;
       const state = useWorkspaceStore.getState();
-      if (!shape.file || !state.files) return;
+      if (!file || !state.files) return;
 
-      const docUnchanged =
-        shape.contentData === state.content &&
-        shape.layoutData === state.layouts &&
-        shape.databaseData === state.databases;
-      const selectionUnchanged = shape.selection === state.selection;
+      const docChanged =
+        ds.contentData.proposed !== null ||
+        ds.layoutData.proposed !== null ||
+        ds.databaseData.proposed !== null ||
+        ds.fileData.proposed !== null;
 
-      // Nothing moved at all — no document edit and no selection change. Skip.
-      if (docUnchanged && selectionUnchanged) return;
+      const sel = draft.selection;
+      const selectionChanged =
+        sel.proposedBlocks !== null ||
+        sel.caret.proposedBlockId !== null ||
+        sel.caret.proposedOffset !== null;
 
-      // Selection-only change (e.g. a caret move): write just the snapshot so
-      // WSA's selected-block flags update without a document write.
-      if (docUnchanged) {
-        state.setSelection(shape.selection);
+      if (!docChanged && !selectionChanged) return;
+
+      const caretBlockId =
+        sel.caret.proposedBlockId ?? sel.caret.currentBlockId;
+      const nextSelection: SelectionSnapshot = {
+        selectedBlockIds: sel.proposedBlocks ?? sel.currentBlocks,
+        caret:
+          caretBlockId !== null
+            ? {
+                blockId: caretBlockId,
+                offset:
+                  sel.caret.proposedOffset ?? sel.caret.currentOffset ?? 0,
+              }
+            : null,
+      };
+
+      if (!docChanged) {
+        state.setSelection(nextSelection);
         return;
       }
 
+      const content = ds.contentData.proposed ?? ds.contentData.currentReadOnly;
+      const layout = ds.layoutData.proposed ?? ds.layoutData.currentReadOnly;
+      const database =
+        ds.databaseData.proposed ?? ds.databaseData.currentReadOnly;
+
       const updatedFiles: FilesDataSet = {
         ...state.files,
-        [shape.file.id]: shape.file,
+        [file.id]: file,
       };
-      saveDocument(
-        updatedFiles,
-        shape.contentData,
-        shape.layoutData,
-        shape.databaseData,
-      );
-      setDataSet(
-        updatedFiles,
-        shape.contentData,
-        shape.layoutData,
-        shape.databaseData,
-      );
-      // activeFile drives the rendered root list. setDataSet refreshes files and
-      // content but not activeFile, so without this the stale activeFile.content
-      // omits a freshly created block id (create never renders) while a deleted
-      // id survives only because its content entry is gone (filter drops it).
-      state.setActiveFile(shape.file);
-      state.setSelection(shape.selection);
+      saveDocument(updatedFiles, content, layout, database);
+      setDataSet(updatedFiles, content, layout, database);
+      state.setActiveFile(file);
+      state.setSelection(nextSelection);
     },
     [saveDocument, setDataSet],
   );
@@ -144,42 +158,60 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     (
       channel: "mouse" | "key" | "lifecycle",
       data: MouseEventData | KeyEventData | LifecycleEventData,
-      trigger: string, //needs to be set to a type for trigger-words
+      trigger: string,
     ): void => {
-      const state = useWorkspaceStore.getState();
-      if (!state.content) return;
+      if (!contentDataSet) return;
 
-      let shape: DocShape = {
-        file: state.activeFile,
-        contentData: state.content,
-        layoutData: state.layouts ?? {},
-        databaseData: state.databases ?? {},
-        selection: state.selection,
-      };
+      const nativeEvent = "nativeEvent" in data ? data.nativeEvent : null;
+
+      let draft: DocDraft = buildDraft(
+        activeFile,
+        contentDataSet,
+        layouts ?? {},
+        databases ?? {},
+        selection,
+        {
+          event: nativeEvent,
+          data,
+          targetId: data.blockId,
+          triggerWord: trigger as TriggerWord,
+        },
+      );
 
       if (channel === "mouse") {
         const d = data as MouseEventData;
-        shape = bm.receiveMouseEvent(d, trigger, shape);
-        shape = sm.receiveMouseEvent(d, trigger, shape);
-        shape = dm.receiveMouseEvent(d, trigger, shape);
-        shape = lm.receiveMouseEvent(d, trigger, shape);
+        draft = bm.receiveMouseEvent(d, trigger, draft);
+        draft = sm.receiveMouseEvent(d, trigger, draft);
+        draft = dm.receiveMouseEvent(d, trigger, draft);
+        draft = lm.receiveMouseEvent(d, trigger, draft);
       } else if (channel === "key") {
         const d = data as KeyEventData;
-        shape = bm.receiveKeyEvent(d, trigger, shape);
-        shape = sm.receiveKeyEvent(d, trigger, shape);
-        shape = dm.receiveKeyEvent(d, trigger, shape);
-        shape = lm.receiveKeyEvent(d, trigger, shape);
+        draft = bm.receiveKeyEvent(d, trigger, draft);
+        draft = sm.receiveKeyEvent(d, trigger, draft);
+        draft = dm.receiveKeyEvent(d, trigger, draft);
+        draft = lm.receiveKeyEvent(d, trigger, draft);
       } else {
         const d = data as LifecycleEventData;
-        shape = bm.receiveLifecycleEvent(d, trigger, shape);
-        shape = sm.receiveLifecycleEvent(d, trigger, shape);
-        shape = dm.receiveLifecycleEvent(d, trigger, shape);
-        shape = lm.receiveLifecycleEvent(d, trigger, shape);
+        draft = bm.receiveLifecycleEvent(d, trigger, draft);
+        draft = sm.receiveLifecycleEvent(d, trigger, draft);
+        draft = dm.receiveLifecycleEvent(d, trigger, draft);
+        draft = lm.receiveLifecycleEvent(d, trigger, draft);
       }
 
-      commit(shape);
+      commit(draft);
     },
-    [bm, sm, dm, lm, commit],
+    [
+      activeFile,
+      contentDataSet,
+      layouts,
+      databases,
+      selection,
+      bm,
+      sm,
+      dm,
+      lm,
+      commit,
+    ],
   );
 
   // ── Hand the workspace element to the helpers that query the DOM ─────────

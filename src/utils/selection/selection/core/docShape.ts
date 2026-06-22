@@ -4,14 +4,19 @@
 // rest of ClaudeSelectionManager can keep importing from "./docShape" unchanged.
 
 export type {
-    DocShape,
-    FileData,
-    ContentDataSet,
-    LayoutDataSet,
-    DatabaseDataSet,
-    TextElement,
-    SelectionSnapshot,
-    CaretTarget,
+  DocShape,
+  DocDraft,
+  FileData,
+  ContentDataSet,
+  LayoutDataSet,
+  DatabaseDataSet,
+  TextElement,
+  SelectionSnapshot,
+  CaretTarget,
 } from "../../../../types/types";
 
-export { emptySelectionSnapshot } from "../../../../types/types";
+export {
+  emptySelectionSnapshot,
+  draftToFlat,
+  foldIntoDraft,
+} from "../../../../types/types";

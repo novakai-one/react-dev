@@ -18,7 +18,12 @@ import {
   NEW_BLOCK_TOP,
   NEW_BLOCK_CONTENT,
 } from "../../../utils/layout/module/workspaceLayout";
-import { layoutKey, CHECKBOX_CHECKED } from "../../../types/types";
+import {
+  layoutKey,
+  CHECKBOX_CHECKED,
+  draftToFlat,
+  foldIntoDraft,
+} from "../../../types/types";
 import { useWorkspaceStore } from "../../store/useWorkspaceStore";
 import {
   makeDatabaseConfig,
@@ -37,6 +42,7 @@ import type {
   LifecycleEventData,
   BlockSpec,
   DocShape,
+  DocDraft,
 } from "../../../types/types";
 import { findBlockDefinition } from "./blockDefinitions";
 
@@ -49,6 +55,36 @@ export default class BlockManager {
   // ── Conduit entry points (uniform shape) ─────────────────────────────────
 
   receiveMouseEvent = (
+    data: MouseEventData,
+    trigger: string,
+    draft: DocDraft,
+  ): DocDraft => {
+    const before = draftToFlat(draft);
+    const next = this._receiveMouseFlat(data, trigger, before);
+    return foldIntoDraft(draft, before, next);
+  };
+
+  receiveKeyEvent = (
+    data: KeyEventData,
+    trigger: string,
+    draft: DocDraft,
+  ): DocDraft => {
+    const before = draftToFlat(draft);
+    const next = this._receiveKeyFlat(data, trigger, before);
+    return foldIntoDraft(draft, before, next);
+  };
+
+  receiveLifecycleEvent = (
+    data: LifecycleEventData,
+    trigger: string,
+    draft: DocDraft,
+  ): DocDraft => {
+    const before = draftToFlat(draft);
+    const next = this._receiveLifecycleFlat(data, trigger, before);
+    return foldIntoDraft(draft, before, next);
+  };
+
+  private _receiveMouseFlat = (
     mouseData: MouseEventData,
     trigger: string,
     shape: DocShape,
@@ -67,7 +103,7 @@ export default class BlockManager {
     }
   };
 
-  receiveKeyEvent = (
+  private _receiveKeyFlat = (
     keyData: KeyEventData,
     trigger: string,
     shape: DocShape,
@@ -94,7 +130,7 @@ export default class BlockManager {
     }
   };
 
-  receiveLifecycleEvent = (
+  private _receiveLifecycleFlat = (
     data: LifecycleEventData,
     trigger: string,
     shape: DocShape,

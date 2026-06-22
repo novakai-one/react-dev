@@ -17,8 +17,13 @@ import type {
   KeyEventData,
   LifecycleEventData,
   DocShape,
+  DocDraft,
 } from "../../types/types";
-import { resolveFileCollisions, orderByPosition } from "./module/workspaceLayout";
+import { draftToFlat, foldIntoDraft } from "../../types/types";
+import {
+  resolveFileCollisions,
+  orderByPosition,
+} from "./module/workspaceLayout";
 
 // ── LayoutManager (class) ────────────────────────────────────────────────
 // The last helper in WSA's conduit. Receives the shape AFTER BlockManager has
@@ -31,6 +36,36 @@ import { resolveFileCollisions, orderByPosition } from "./module/workspaceLayout
 // over-eager pass costs nothing — React diffs by reference at commit.
 export default class LayoutManager {
   receiveMouseEvent = (
+    data: MouseEventData,
+    trigger: string,
+    draft: DocDraft,
+  ): DocDraft => {
+    const before = draftToFlat(draft);
+    const next = this._receiveMouseFlat(data, trigger, before);
+    return foldIntoDraft(draft, before, next);
+  };
+
+  receiveKeyEvent = (
+    data: KeyEventData,
+    trigger: string,
+    draft: DocDraft,
+  ): DocDraft => {
+    const before = draftToFlat(draft);
+    const next = this._receiveKeyFlat(data, trigger, before);
+    return foldIntoDraft(draft, before, next);
+  };
+
+  receiveLifecycleEvent = (
+    data: LifecycleEventData,
+    trigger: string,
+    draft: DocDraft,
+  ): DocDraft => {
+    const before = draftToFlat(draft);
+    const next = this._receiveLifecycleFlat(data, trigger, before);
+    return foldIntoDraft(draft, before, next);
+  };
+
+  private _receiveMouseFlat = (
     _mouseData: MouseEventData,
     trigger: string,
     shape: DocShape,
@@ -47,7 +82,7 @@ export default class LayoutManager {
     return shape;
   };
 
-  receiveKeyEvent = (
+  private _receiveKeyFlat = (
     keyData: KeyEventData,
     trigger: string,
     shape: DocShape,
@@ -58,7 +93,7 @@ export default class LayoutManager {
     return shape;
   };
 
-  receiveLifecycleEvent = (
+  private _receiveLifecycleFlat = (
     _data: LifecycleEventData,
     _trigger: string,
     shape: DocShape,
