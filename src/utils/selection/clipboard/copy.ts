@@ -4,8 +4,8 @@ import type {
     LayoutDataSet,
     DatabaseDataSet,
     TextElement,
-} from "../../types/types"
-import { layoutKey, databaseKey } from "../../types/types"
+} from "../../../types/types"
+import { layoutKey, databaseKey } from "../../../types/types"
 import type { SelectionPoint } from "../selection/core/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { resolveSelectedIds } from "./selectionRange"

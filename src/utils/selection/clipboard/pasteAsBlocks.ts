@@ -4,8 +4,8 @@ import type {
     LayoutDataSet,
     DatabaseDataSet,
     LayoutItem,
-} from "../../types/types"
-import { layoutKey, databaseKey } from "../../types/types"
+} from "../../../types/types"
+import { layoutKey, databaseKey } from "../../../types/types"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { regenerateIds } from "./ids"
 import { insertIndexAfter, bottomEdgeOfAnchor, insertIntoContent } from "./pasteShared"

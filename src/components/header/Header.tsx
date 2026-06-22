@@ -1,6 +1,6 @@
 import './header.css'
 import { useWorkspaceStore } from '../store/useWorkspaceStore'
-import { useLayoutStore } from '../../layout/useLayoutStore'
+import { useLayoutStore } from '../../utils/layout/store/useLayoutStore'
 
 // Sidebar glyph (à la Obsidian / Claude desktop): a panel outline with one
 // column divided off. `side` puts the divider+fill on the left or right; `open`

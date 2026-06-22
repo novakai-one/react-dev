@@ -1,4 +1,4 @@
-import './workspace-empty-state.css'
+import './styles/workspace-empty-state.css'
 
 // Shown when the active file has no blocks (or no file is open yet). An empty
 // canvas reads as "broken/unfinished"; a centred prompt reads as "ready". Purely
