@@ -8,10 +8,12 @@ when you read or edit files under `src/`. Do not duplicate it here.
 
 ---
 
-## Workflow gate (every task)
+## Workflow (every task)
 
-For any task that creates or changes a module, output a **Design Block** and
-STOP for my approval before writing code:
+Default to autonomous execution. Do not stop for approval on a clear task.
+
+For a task that creates or changes a module, work through this Design Block in
+your head (do NOT print it and wait for me), then go straight to code:
 
 ```
 DESIGN BLOCK
@@ -23,7 +25,12 @@ DESIGN BLOCK
 - Rules it could violate + how I avoid them: <...>
 ```
 
-Trivial task (typo, comment, rename): say "trivial — skipping design block" and proceed.
+Trivial task (typo, comment, rename): skip the design block, proceed.
+
+Stop and ask ONE specific question only when a missing decision blocks
+correctness — something the code cannot be written without. A naming choice or
+a default value is not such a case: pick the obvious option and note it in one
+line, then keep going.
 
 A task is NOT done until `npm run verify` passes. Run it and paste the output.
 "I believe it passes" is a failure. If it fails twice on the same point, leave
@@ -53,6 +60,18 @@ If fixing DragContainer breaks a third component, leave it and report back.
 names the rule you broke. Never weaken or delete a verify rule to make code pass.
 If a rule blocks you and you think it's wrong, say so and wait. Fix the code, not
 the check.
+
+## Frozen code (spec-driven edits)
+
+Some specs mark code "unchanged", "byte-for-byte", or "frozen".
+
+- Edit by find/replace. Never rewrite a file to regenerate a frozen body.
+- The read-checked style rules in `src/CLAUDE.md` (named functions, small
+  functions, meaningful names) do NOT apply to a frozen body. Keep it exactly.
+- A deliberate cast or `eslint-disable` written into the spec is intentional.
+  Keep it verbatim.
+- This is not weakening a verify rule. If a frozen body actually fails
+  `npm run verify`, do not restyle it to pass — report the failing rule and stop.
 
 ## Deeper docs
 

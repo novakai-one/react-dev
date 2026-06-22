@@ -218,6 +218,49 @@ export interface DocShape {
   selection: SelectionSnapshot;
 }
 
+export interface newDocShape {
+  event: {
+    event: React.Event; //use the types that are accepted through current callbacks
+    data: MouseEventData | KeyEventData | LifecycleEventData;
+    targetId: string;
+    triggerWord: type TriggerWords; //must use the trigger words in /types/trigger-words.ts -> these need to be turned into a type to ensure compliance.
+  },
+  dataSet: {
+    contentData: {
+      currentReadOnly: ContentDataSet
+      proposed: ContentDataSet | null[] | null 
+      //need a way to start the proposed off as null, but null means no changes- it cant just be the same thing as current by default.
+      //because proposed can be trusted as a newly created proposal.
+      //thefofre there needs to be a null to say nothing has changed.
+      //but things cna also be deleted so we need a way to communicate that we have intentionally deleted somethng.
+      //e.g. if a whole file is deleted then datasets would be deleted and propsoed needs to show that.
+    },
+    layoutData:{
+      currentReadOnly: LayoutDataSet
+      proposed: LayoutDataSet | null
+    },
+    databaseData:{
+      currentReadOnly: DatabaseDataSet
+      proposed: DatabaseDataSet | null
+    }
+  },
+  selection: {
+    currentBlocks: string[];
+    propsoedBlocks: string[];
+    caret: {
+      currentBlockId: string,
+      proposedBlockId; string;
+      currentOffset: number;
+      proposedOffset: number;
+    }
+  },
+  created: {
+    newBlockIds: string[] | null //default null
+  }
+  //all proposed must start with default of null
+  //current must never be mutated by any of the classes who receive shape - they only mutate proposed or new. 
+}
+
 // Composite key so one block can be placed in many files without collisions.
 // (Same block twice in the SAME file would need a unique placement id instead —
 //  a later step, since selection + the DOM currently key off blockId.)
