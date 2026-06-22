@@ -18,7 +18,7 @@ import type {
   LifecycleEventData,
   DocShape,
 } from "../../types/types";
-import { resolveFileCollisions, orderByPosition } from "./workspaceLayout";
+import { resolveFileCollisions, orderByPosition } from "./module/workspaceLayout";
 
 // ── LayoutManager (class) ────────────────────────────────────────────────
 // The last helper in WSA's conduit. Receives the shape AFTER BlockManager has

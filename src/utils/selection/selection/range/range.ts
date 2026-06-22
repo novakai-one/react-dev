@@ -11,7 +11,7 @@
 //   - middle blocks      : whole block (offset -1, offsetEnd -1)
 //   - last block         : start of block -> its offset (offset 0)
 
-import type { SelectionState, SelectionPoint } from "./selectionState";
+import type { SelectionState, SelectionPoint } from "../core/selectionState";
 
 export function orderedSelectionRange(
     selection: SelectionState,

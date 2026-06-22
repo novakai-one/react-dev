@@ -1,4 +1,4 @@
-import type { SelectionState, SelectionPoint } from "./selectionState";
+import type { SelectionState, SelectionPoint } from "../core/selectionState";
 import type { MouseEventData } from "./eventData";
 import { pointToPosition } from "./domHelpers";
 

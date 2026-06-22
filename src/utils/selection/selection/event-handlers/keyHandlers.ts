@@ -13,10 +13,10 @@
 // same key event upstream and owns those keystrokes. This module stays pure
 // w.r.t. selection state and never touches the clipboard.
 
-import type { SelectionState, SelectionPoint } from "./selectionState";
+import type { SelectionState, SelectionPoint } from "../core/selectionState";
 import type { KeyEventData } from "./eventData";
-import * as caret from "./caretNavigation";
-import * as extend from "./selectionExtend";
+import * as caret from "../caret/caretNavigation";
+import * as extend from "../core/selectionExtend";
 
 // Single entry point used by the router. trigger is "keydown" only for now;
 // keyup is a no-op at the router level.

@@ -11,8 +11,8 @@
 // Contract: read selection state + the block order, build a Range, paint it.
 // Returns void. Never returns a shape. Never calls a setter.
 
-import type { SelectionState, SelectionPoint } from "./selectionState";
-import { blockElementById, textNodeAtOffset } from "./domHelpers";
+import type { SelectionState, SelectionPoint } from "../core/selectionState";
+import { blockElementById, textNodeAtOffset } from "../event-handlers/domHelpers";
 
 // Name registered with CSS.highlights — the matching ::highlight(name) lives in CSS.
 const HIGHLIGHT_NAME = "doc-selection";

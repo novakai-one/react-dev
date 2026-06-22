@@ -7,8 +7,8 @@
 // No DOM writes. No setters. No re-render. (Reads block text via domHelpers.)
 
 import type { SelectionState, SelectionPoint } from "./selectionState";
-import type { KeyEventData } from "./eventData";
-import { getElementText } from "./domHelpers";
+import type { KeyEventData } from "../event-handlers/eventData";
+import { getElementText } from "../event-handlers/domHelpers";
 
 // ── Shift + Arrow: extend by one character / block edge ──────────────────────
 

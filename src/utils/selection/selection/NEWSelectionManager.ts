@@ -4,17 +4,17 @@
 //New SM needs to have uniform shape for events -> It should not be deciding what goes to CM and what does not.
 //Needs to follow same pattern as wsa where it routes uniformly regardless of teh event type.
 
-import type { DocShape, SelectionSnapshot, CaretTarget } from "./docShape";
-import type { MouseEventData, KeyEventData, LifecycleEventData } from "./eventData";
-import type { SelectionState } from "./selectionState";
-import { emptySelection } from "./selectionState";
-import { emptySelectionSnapshot } from "./docShape";
-import { routeMouse, routeKey, routeLifecycle } from "./router";
-import { renderSelectionHighlight } from "./highlightRenderer";
+import type { DocShape, SelectionSnapshot, CaretTarget } from "./core/docShape";
+import type { MouseEventData, KeyEventData, LifecycleEventData } from "./event-handlers/eventData";
+import type { SelectionState } from "./core/selectionState";
+import { emptySelection } from "./core/selectionState";
+import { emptySelectionSnapshot } from "./core/docShape";
+import { routeMouse, routeKey, routeLifecycle } from "./core/router";
+import { renderSelectionHighlight } from "./highlighting/highlightRenderer";
 import { ClipboardManager } from "../clipboard/ClipboardManager";
-import { buildShape } from "./shapeBuilder";
-import { orderedSelectionRange } from "./range";
-import { isDeleteKey } from "./keyHandlers";
+import { buildShape } from "./core/shapeBuilder";
+import { orderedSelectionRange } from "./range/range";
+import { isDeleteKey } from "./event-handlers/keyHandlers";
 
 
 export class NewSelectionManager {

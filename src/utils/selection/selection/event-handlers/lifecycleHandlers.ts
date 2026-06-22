@@ -3,7 +3,7 @@
 // Selection state in -> new selection state out.
 // No DOM writes. No setters. No re-render.
 
-import type { SelectionState } from "./selectionState";
+import type { SelectionState } from "../core/selectionState";
 import type { LifecycleEventData } from "./eventData";
 
 // Blur: a block lost focus. Selection is intentionally PERSISTED across blur —

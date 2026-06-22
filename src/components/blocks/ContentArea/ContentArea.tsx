@@ -115,8 +115,6 @@ export default function ContentArea({
     }
 
     const handleKeyboardEvent = (e: React.KeyboardEvent, trigger: string) => {
-        // nativeEvent is the live React event — SM owns preventDefault, so the
-        // chain CA → WSA → SM must stay synchronous (no setTimeout / Promise.then).
         const keyData: KeyEventData = {
             key:       e.key,
             shiftKey:  e.shiftKey,
@@ -133,9 +131,6 @@ export default function ContentArea({
 
     const handleLifecycleEvent = (trigger: string) => {
         console.log(trigger) //to get around Supabase error
-        // Lifecycle events carry no DOM event reference — SM reads th
-        // e live DOM itself.
-         //commented out 19th June to see if anything breaks. Seems unnecessary
         const lifecycleData: LifecycleEventData = {
             blockId:   id,
             blockType: component,
@@ -150,6 +145,7 @@ export default function ContentArea({
             <Tag
                 ref={contentRef as React.Ref<never>}
                 id={id}
+                key={id}
                 data-blockid={id}
                 data-empty={isEmpty ? "true" : undefined}
                 data-placeholder={PLACEHOLDERS[Tag as string] ?? PLACEHOLDERS.p}
@@ -168,7 +164,6 @@ export default function ContentArea({
                     const childNode = contentDataSet[child]
                     return (
                         <ContentArea
-                            
                             activeContent={childNode}
                             contentDataSet={contentDataSet}
                             cbMouseEvent={cbMouseEvent}

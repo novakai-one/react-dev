@@ -8,10 +8,10 @@
 // unreliable (defaults to 80, or 0 on drop) and never tracks content, so the
 // collision pass needs a fresh measurement to keep blocks flush.
 
-import { GRID_UNIT, rowsForHeight, heightForRows, snapToGrid } from './grid'
+import { GRID_UNIT, rowsForHeight, heightForRows, snapToGrid } from '../grid/grid'
 import { resolveCollisions } from './collisionManager'
-import { layoutKey } from '../../types/types'
-import type { LayoutDataSet, LayoutItem } from '../../types/types'
+import { layoutKey } from '../../../types/types'
+import type { LayoutDataSet, LayoutItem } from '../../../types/types'
 
 
 // Defaults for newly created blocks (pixels — not grid based).

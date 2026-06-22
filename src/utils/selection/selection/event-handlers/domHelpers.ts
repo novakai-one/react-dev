@@ -6,7 +6,7 @@
 // Block elements are found by the `data-blockid` attribute ContentArea renders,
 // which is unique per block, so these reads need no workspace root passed in.
 
-import type { SelectionPoint } from "./selectionState";
+import type { SelectionPoint } from "../core/selectionState";
 
 // Maps a viewport point to a document position: which block was hit, and the
 // character offset inside that block's text. Off any block -> empty blockId.

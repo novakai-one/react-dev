@@ -1,5 +1,5 @@
 import type { DocShape, KeyEventData } from "../../types/types"
-import type { SelectionPoint } from "../selection/selectionState"
+import type { SelectionPoint } from "../selection/core/selectionState"
 import type { ClipboardMode } from "./clipboardStore"
 import { copy } from "./copy"
 import { cut } from "./cut"

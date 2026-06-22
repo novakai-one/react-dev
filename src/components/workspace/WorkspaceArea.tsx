@@ -16,7 +16,7 @@ import type {
 import { layoutKey } from "../../types/types";
 import type { NewSelectionManager } from "../../utils/selection/selection/NEWSelectionManager"
 import type DragManager from "../../utils/draggable/dragManager/DragManager";
-import type BlockManager from "../blocks/blockCreator/blockManager";
+import type BlockManager from "../blocks/blockManager/blockManager";
 import type LayoutManager from "../../utils/layout/layoutManager";
 import DragContainer from "../../utils/draggable/dragContainer/DragContainer";
 import WorkspaceEmptyState from "./WorkspaceEmptyState";
@@ -144,7 +144,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
     (
       channel: "mouse" | "key" | "lifecycle",
       data: MouseEventData | KeyEventData | LifecycleEventData,
-      trigger: string,
+      trigger: string, //needs to be set to a type for trigger-words
     ): void => {
       const state = useWorkspaceStore.getState();
       if (!state.content) return;
@@ -209,7 +209,7 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
 
   // ── Thin DOM-event adapters: shape the native event, hand to the router ──
   // No logic beyond shaping. A block's own handlers fire with that block's id;
-  // the workspace root fires for canvas events.
+  // the workspace root fires for canvas evxents.
 
   const handleMouseEvent = useCallback(
     (data: MouseEventData, trigger: string) => route("mouse", data, trigger),

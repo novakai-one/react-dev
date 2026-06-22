@@ -6,14 +6,14 @@
 // boundaries from the single source of truth — never from DOM order.
 
 import type { SelectionState } from "./selectionState";
-import type { MouseEventData, KeyEventData, LifecycleEventData } from "./eventData";
+import type { MouseEventData, KeyEventData, LifecycleEventData } from "../event-handlers/eventData";
 import {
     handleMouseDown,
     handleMouseDrag,
     handleMouseUp,
-} from "./mouseHandlers";
-import { handleKeyDown } from "./keyHandlers";
-import { handleBlur } from "./lifecycleHandlers";
+} from "../event-handlers/mouseHandlers";
+import { handleKeyDown } from "../event-handlers/keyHandlers";
+import { handleBlur } from "../event-handlers/lifecycleHandlers";
 
 // Mouse: trigger -> one mouse handler. blockOrder is unused for mouse routing
 // (the handlers resolve position from the DOM via clientX/clientY), kept in the

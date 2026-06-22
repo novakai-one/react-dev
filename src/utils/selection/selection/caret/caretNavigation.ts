@@ -8,10 +8,10 @@
 // blockOrder (shape.file.content) is the source of truth for crossing block
 // boundaries — e.g. ArrowLeft at offset 0 moves to the end of the previous block.
 
-import type { SelectionState, SelectionPoint } from "./selectionState";
-import { collapse } from "./selectionState";
-import type { KeyEventData } from "./eventData";
-import { getElementText } from "./domHelpers";
+import type { SelectionState, SelectionPoint } from "../core/selectionState";
+import { collapse } from "../core/selectionState";
+import type { KeyEventData } from "../event-handlers/eventData";
+import { getElementText } from "../event-handlers/domHelpers";
 
 // ArrowLeft: one character left. At offset 0, jump to the end of the previous block.
 export function arrowLeft(state: SelectionState, key: KeyEventData, blockOrder: string[]): SelectionState {

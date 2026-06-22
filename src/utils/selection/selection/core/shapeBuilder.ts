@@ -10,7 +10,7 @@
 
 import type { DocShape, ContentDataSet, TextElement, SelectionSnapshot } from "./docShape";
 import type { SelectionState, SelectionPoint } from "./selectionState";
-import { orderedSelectionRange } from "./range";
+import { orderedSelectionRange } from "../range/range";
 
 // Build the new shape. When `deleteSelection` is set and the selection spans real
 // text, the selected span is cut from every affected block; otherwise the shape
