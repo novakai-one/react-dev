@@ -5,6 +5,15 @@ flowchart LR
 %% bug-free, shippable app. The WSA router (BM -> SM -> DM -> LM) is FROZEN
 %% and unchanged. New/proposed classes are marked in novakai-target.md.
 %% root main
+%% Drill-in containment: each helper group lives INSIDE its manager. Click a
+%% manager's "Open internals" button to see its helpers (one level down). The
+%% top level stays at architecture altitude; helper detail is hidden until you
+%% drill in. Groups are transparent for leveling, so the helpers report the
+%% manager as their level.
+%% parent blockHelpers blockManager
+%% parent selectionHelpers selectionManager
+%% parent layoutHelpers layoutManager
+%% parent clipboardHelpers clipboardManager
 
 %% ---- shell ----
 %% fm:meta main name=main.tsx
