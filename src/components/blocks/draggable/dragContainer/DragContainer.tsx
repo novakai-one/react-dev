@@ -14,7 +14,7 @@
 
 import DragHandle from '../dragHandle/DragHandle'
 import type { DragContainerProps } from '../../types/types'
-import { PAGE_X } from '../../../../utils/layout/grid/grid'
+import { PAGE_X } from '../../../../managers/layout/grid/grid'
 import './drag-container.css'
 
 

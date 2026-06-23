@@ -11,7 +11,7 @@ import type {
 } from "../../../types/types";
 import { useWorkspaceStore } from "../../../components/store/useWorkspaceStore";
 import { useBlockEventStore } from "../../../components/store/useBlockEventStore";
-import { useLayoutStore } from "../../../utils/layout/store/useLayoutStore";
+import { useLayoutStore } from "../../../managers/layout/store/useLayoutStore";
 import { useDocumentStorage } from "../../../storage/useDocumentStorage";
 import { BLOCK_DEFINITIONS } from "../../blocks/blockManager/blockDefinitions";
 

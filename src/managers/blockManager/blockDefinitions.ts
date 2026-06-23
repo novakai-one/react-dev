@@ -9,7 +9,7 @@
 // Lists (ul/ol) are left out for now — they need nested <li> children the insert
 // flow doesn't build yet.
 
-import type { BlockSpec } from "../../../types/types";
+import type { BlockSpec } from "../../types/types";
 
 export const BLOCK_DEFINITIONS: BlockSpec[] = [
   { id: "block-h1", block: "Heading 1", component: "ContentArea", Tag: "h1" },

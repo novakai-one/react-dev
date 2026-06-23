@@ -16,10 +16,10 @@ import type {
 } from "../../types/types";
 import { layoutKey, buildDraft } from "../../types/types";
 import type { TriggerWord } from "../../types/trigger-words";
-import type { NewSelectionManager } from "../../utils/selection/selection/NEWSelectionManager";
+import type { NewSelectionManager } from "../../managers/selection/selection/NEWSelectionManager";
 import type DragManager from "../../components/blocks/draggable/dragManager/DragManager";
-import type BlockManager from "../blocks/blockManager/blockManager";
-import type LayoutManager from "../../utils/layout/layoutManager";
+import type BlockManager from "../../managers/blockManager/blockManager";
+import type LayoutManager from "../../managers/layout/layoutManager";
 import DragContainer from "../../components/blocks/draggable/dragContainer/DragContainer";
 import WorkspaceEmptyState from "./WorkspaceEmptyState";
 import {

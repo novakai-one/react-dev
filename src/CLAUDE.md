@@ -17,21 +17,11 @@ Forbidden inside a container:
 - functions named like `createBlockAt`, `deleteX`, `placeY` (these are decisions)
 - `if` statements that choose a domain outcome
 
-Required pattern — uniform fan-out, no branching on outcome:
-```ts
-const route = (channel, data, trigger) => {
-  let shape = buildShape()              // package only
-  shape = bm.receiveMouseEvent(d, trigger, shape)
-  shape = sm.receiveMouseEvent(d, trigger, shape)
-  shape = dm.receiveMouseEvent(d, trigger, shape)
-  shape = lm.receiveMouseEvent(d, trigger, shape)
-  commit(shape)                          // hand off, never decide
-}
-```
+---
 A choice inside a container belongs in a manager. Move it.
 
 ### Uniform shapes everywhere.
-Every manager receives and returns the SAME shape type (e.g. `DocShape`).
+Every manager receives and returns the SAME shape type.
 No bespoke signatures per manager. Same in, same out.
 
 ### Coupling: ≤ 1 caller by default.

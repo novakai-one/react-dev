@@ -9,7 +9,7 @@
 // State: only the workspace element (handed in once on mount) so it can convert
 // a click's viewport y into content y. The document lives in the shape, in/out.
 
-import { snapToGrid, GRID_UNIT, PAGE_X } from "../../../utils/layout/grid/grid";
+import { snapToGrid, GRID_UNIT, PAGE_X } from "../../managers/layout/grid/grid";
 import {
   measuredBlockHeight,
   NEW_BLOCK_DEFAULT_W,
@@ -17,19 +17,19 @@ import {
   NEW_BLOCK_VERTICAL_GAP,
   NEW_BLOCK_TOP,
   NEW_BLOCK_CONTENT,
-} from "../../../utils/layout/module/workspaceLayout";
+} from "../../managers/layout/module/workspaceLayout";
 import {
   layoutKey,
   CHECKBOX_CHECKED,
   draftToFlat,
   foldIntoDraft,
-} from "../../../types/types";
-import { useWorkspaceStore } from "../../store/useWorkspaceStore";
+} from "../../types/types";
+import { useWorkspaceStore } from "../../components/store/useWorkspaceStore";
 import {
   makeDatabaseConfig,
   makeDatabaseRow,
   DB_BLOCK_DEFAULT_H,
-} from "../database/databaseFactory";
+} from "../../components/blocks/database/databaseFactory";
 import type {
   ContentDataSet,
   LayoutDataSet,
@@ -43,7 +43,7 @@ import type {
   BlockSpec,
   DocShape,
   DocDraft,
-} from "../../../types/types";
+} from "../../types/types";
 import { findBlockDefinition } from "./blockDefinitions";
 
 export default class BlockManager {

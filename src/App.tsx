@@ -6,13 +6,13 @@ import RightPanel from './components/panels/right-panel/RightPanel'
 import { useDocumentStorage } from './storage/useDocumentStorage'
 import { useWorkspaceStore } from './components/store/useWorkspaceStore'
 import { useThemeStore } from './theme/useThemeStore'
-import { useLayoutStore } from './utils/layout/store/useLayoutStore'
+import { useLayoutStore } from './managers/layout/store/useLayoutStore'
 import { useAuthStore } from './auth/useAuthStore'
 import Login from './auth/Login'
-import { NewSelectionManager } from './utils/selection/selection/NEWSelectionManager'
+import { NewSelectionManager } from './managers/selection/selection/NEWSelectionManager'
 import DragManager from './components/blocks/draggable/dragManager/DragManager'
 import BlockManager from './components/blocks/blockManager/blockManager'
-import LayoutManager from './utils/layout/layoutManager'
+import LayoutManager from './managers/layout/layoutManager'
 import DesignDemo from './theme/design-demo/DesignDemo' // ── DEMO TOGGLE: delete this line + the block below + the design-demo folder to remove ──
 
 // Flag is read once at module load, so it never changes mid-session → hook order stays stable.

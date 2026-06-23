@@ -49,8 +49,6 @@ If fixing DragContainer breaks a third component, leave it and report back.
 
 ## Working style
 
-- Don't plan more than ~10 seconds without executing. Plan a little, execute,
-  build, find errors, fix, repeat.
 - Work in small verifiable chunks: one module → design block → code → verify → next.
 - Mistakes are fine; we fix them. Don't get stuck.
 
@@ -58,8 +56,7 @@ If fixing DragContainer breaks a third component, leave it and report back.
 
 `npm run verify` enforces the architecture and style rules. Read its error — it
 names the rule you broke. Never weaken or delete a verify rule to make code pass.
-If a rule blocks you and you think it's wrong, say so and wait. Fix the code, not
-the check.
+If a rule blocks you and you think it's wrong Fix the code, not the check.
 
 ## Frozen code (spec-driven edits)
 
@@ -78,3 +75,9 @@ Some specs mark code "unchanged", "byte-for-byte", or "frozen".
 - `docs/VERIFY_SETUP.md` — what `npm run verify` runs and why.
 - `docs/SUPABASE_SETUP.md` — storage setup.
 - `docs/BuildPlan/` — roadmap.
+
+## Mandatory updates
+
+- After completion, ensure that novakai.mmd is updated with the correct details.
+- Only make changes to .mmd based on the modules that you created or edited.
+- file location: /Users/christopherdasca/Programming/NovaKai/Novakai/src/mermaid/novakai.mmd

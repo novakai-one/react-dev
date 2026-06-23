@@ -1,6 +1,6 @@
 import './right-panel.css'
 import { useThemeStore } from '../../../theme/useThemeStore'
-import { useLayoutStore } from '../../../utils/layout/store/useLayoutStore'
+import { useLayoutStore } from '../../../managers/layout/store/useLayoutStore'
 import { THEMES, ACCENTS, getTheme, type Theme } from '../../../theme/themes'
 import type { PageWidth } from '../../../types/types'
 
