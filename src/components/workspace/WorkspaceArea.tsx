@@ -179,23 +179,20 @@ export default function WorkspaceArea({ sm, dm, bm, lm }: WorkspaceAreaProps) {
       );
 
       if (channel === "mouse") {
-        const d = data as MouseEventData;
-        draft = bm.receiveMouseEvent(d, trigger, draft);
-        draft = sm.receiveMouseEvent(d, trigger, draft);
-        draft = dm.receiveMouseEvent(d, trigger, draft);
-        draft = lm.receiveMouseEvent(d, trigger, draft);
+        draft = bm.receiveMouseEvent(draft);
+        draft = sm.receiveMouseEvent(draft);
+        draft = dm.receiveMouseEvent(draft);
+        draft = lm.receiveMouseEvent(draft);
       } else if (channel === "key") {
-        const d = data as KeyEventData;
-        draft = bm.receiveKeyEvent(d, trigger, draft);
-        draft = sm.receiveKeyEvent(d, trigger, draft);
-        draft = dm.receiveKeyEvent(d, trigger, draft);
-        draft = lm.receiveKeyEvent(d, trigger, draft);
+        draft = bm.receiveKeyEvent(draft);
+        draft = sm.receiveKeyEvent(draft);
+        draft = dm.receiveKeyEvent(draft);
+        draft = lm.receiveKeyEvent(draft);
       } else {
-        const d = data as LifecycleEventData;
-        draft = bm.receiveLifecycleEvent(d, trigger, draft);
-        draft = sm.receiveLifecycleEvent(d, trigger, draft);
-        draft = dm.receiveLifecycleEvent(d, trigger, draft);
-        draft = lm.receiveLifecycleEvent(d, trigger, draft);
+        draft = bm.receiveLifecycleEvent(draft);
+        draft = sm.receiveLifecycleEvent(draft);
+        draft = dm.receiveLifecycleEvent(draft);
+        draft = lm.receiveLifecycleEvent(draft);
       }
 
       commit(draft);

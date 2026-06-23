@@ -54,31 +54,25 @@ export default class BlockManager {
 
   // ── Conduit entry points (uniform shape) ─────────────────────────────────
 
-  receiveMouseEvent = (
-    data: MouseEventData,
-    trigger: string,
-    draft: DocDraft,
-  ): DocDraft => {
+  receiveMouseEvent = (draft: DocDraft): DocDraft => {
+    const data = draft.event.data as MouseEventData;
+    const trigger = draft.event.triggerWord;
     const before = draftToFlat(draft);
     const next = this._receiveMouseFlat(data, trigger, before);
     return foldIntoDraft(draft, before, next);
   };
 
-  receiveKeyEvent = (
-    data: KeyEventData,
-    trigger: string,
-    draft: DocDraft,
-  ): DocDraft => {
+  receiveKeyEvent = (draft: DocDraft): DocDraft => {
+    const data = draft.event.data as KeyEventData;
+    const trigger = draft.event.triggerWord;
     const before = draftToFlat(draft);
     const next = this._receiveKeyFlat(data, trigger, before);
     return foldIntoDraft(draft, before, next);
   };
 
-  receiveLifecycleEvent = (
-    data: LifecycleEventData,
-    trigger: string,
-    draft: DocDraft,
-  ): DocDraft => {
+  receiveLifecycleEvent = (draft: DocDraft): DocDraft => {
+    const data = draft.event.data as LifecycleEventData;
+    const trigger = draft.event.triggerWord;
     const before = draftToFlat(draft);
     const next = this._receiveLifecycleFlat(data, trigger, before);
     return foldIntoDraft(draft, before, next);

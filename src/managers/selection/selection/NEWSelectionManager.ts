@@ -48,31 +48,25 @@ export class NewSelectionManager {
   // is not a clipboard keystroke (mirrors how WSA threads every event through
   // every helper). The selection result is written INTO the shape as a
   // SelectionSnapshot — no external store, no subscription.
-  public receiveMouseEvent = (
-    data: MouseEventData,
-    trigger: string,
-    draft: DocDraft,
-  ): DocDraft => {
+  public receiveMouseEvent = (draft: DocDraft): DocDraft => {
+    const data = draft.event.data as MouseEventData;
+    const trigger = draft.event.triggerWord;
     const before = draftToFlat(draft);
     const next = this._receiveMouseFlat(data, trigger, before);
     return foldIntoDraft(draft, before, next);
   };
 
-  public receiveKeyEvent = (
-    data: KeyEventData,
-    trigger: string,
-    draft: DocDraft,
-  ): DocDraft => {
+  public receiveKeyEvent = (draft: DocDraft): DocDraft => {
+    const data = draft.event.data as KeyEventData;
+    const trigger = draft.event.triggerWord;
     const before = draftToFlat(draft);
     const next = this._receiveKeyFlat(data, trigger, before);
     return foldIntoDraft(draft, before, next);
   };
 
-  public receiveLifecycleEvent = (
-    data: LifecycleEventData,
-    trigger: string,
-    draft: DocDraft,
-  ): DocDraft => {
+  public receiveLifecycleEvent = (draft: DocDraft): DocDraft => {
+    const data = draft.event.data as LifecycleEventData;
+    const trigger = draft.event.triggerWord;
     const before = draftToFlat(draft);
     const next = this._receiveLifecycleFlat(data, trigger, before);
     return foldIntoDraft(draft, before, next);
