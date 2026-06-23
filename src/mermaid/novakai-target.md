@@ -58,7 +58,7 @@ helpers touch the *outside world* but not state:
 | `Toolbar`, `TextStyleControls`, `BlockStyleControls`, `DatabaseStyleControls` | **NEW** | The contextual toolbar requirement. See §4. |
 | `RightPanel` rebuilt on the shared panel kit | **CHANGED** | Today it is bespoke HTML. Target: two tiles (`Style`, `Appearance`) via `Panel`, so left and right panels share one composable kit. |
 | `AppearanceControls` | **NEW (extracted)** | The current theme/accent/page-width UI, lifted out of `RightPanel` into a tile. |
-| `BlockManager` no longer calls `setPendingFocus` | **CHANGED** | Today `BlockManager` reaches into `useWorkspaceStore.getState().setPendingFocus()`. Target folds post-edit focus into `selection.caret` (carried on the draft and committed by WSA), so **no manager touches a store** and one store variable disappears. |
+| Caret ownership moves entirely to `SelectionManager` | **CHANGED** | Today `BlockManager` reaches into `useWorkspaceStore.getState().setPendingFocus()` to steer the caret after creating a block. Target: `BlockManager` has **zero opinion** on caret/selection — it only records the ids it created on `draft.created.newBlockIds`. `SelectionManager`, which runs next, observes those ids on the draft and **independently decides** the caret belongs in the new block. The handoff is the draft, not a `BlockManager → SelectionManager` message. This deletes the `setPendingFocus` store call (no manager touches a store) and removes one store variable. |
 | `DatabaseArea` receives its `DatabaseConfiguration` as a prop | **CHANGED** | Today it reads `useWorkspaceStore` directly. Target passes `config` down from WorkspaceArea so every renderer is a pure conduit. |
 | `activeFile` → `activeFileId` in `useWorkspaceStore` | **CHANGED** | The full `FileData` was a duplicate of `files[id]`. Storing the id and deriving the file removes a stale-copy bug class. |
 | Dead code removed | **REMOVED** | `managers/selection/clipboardmanager/` (duplicate) and `managers/selection/z - legacy-selectionManager/` are not in the target and should be deleted. The canonical clipboard is `managers/selection/clipboard/`. |
@@ -102,7 +102,8 @@ Total **reactive** store variables in the target: **14** (down from ~18).
 | `useLayoutStore` | `pageWidth`, `leftPanelOpen`, `rightPanelOpen` (3) |
 | `useBlockEventStore` | `handler` (1) |
 
-Removed: `pendingFocus` (folded into `selection.caret`), `activeFile` object
+Removed: `pendingFocus` (caret is now decided by SelectionManager from
+`draft.created.newBlockIds` and carried in `selection.caret`), `activeFile` object
 (now derived from `activeFileId`), `user` (derived from `session`). The
 Toolbar's active level and the Panel's selected tile are **component-local**
 (`useState`), not store state — state is a last resort. `clipboardBuffer` is a

@@ -106,7 +106,7 @@ flowchart LR
 %% fm:meta WorkspaceArea i1.accepts=draft: DocDraft
 %% fm:meta WorkspaceArea i1.returns=void
 %% fm:meta blockManager name=BlockManager
-%% fm:meta blockManager desc=step 1; CRUD on TextElement + DatabaseConfiguration and styling of selected blocks; emits no store writes
+%% fm:meta blockManager desc=step 1; CRUD on TextElement + DatabaseConfiguration and styling of selected blocks; records the ids it creates on draft.created; has ZERO opinion on caret or selection
 %% fm:meta blockManager state=wsaEl: HTMLElement | null
 %% fm:meta blockManager i0.name=receiveMouseEvent
 %% fm:meta blockManager i0.accepts=draft: DocDraft
@@ -118,7 +118,7 @@ flowchart LR
 %% fm:meta blockManager i2.accepts=draft: DocDraft
 %% fm:meta blockManager i2.returns=DocDraft
 %% fm:meta selectionManager name=SelectionManager
-%% fm:meta selectionManager desc=step 2; owns caret/range/multi-block selection; paints CSS highlights; threads every event through ClipboardManager
+%% fm:meta selectionManager desc=step 2; sole owner of ALL caret + range + multi-block selection decisions; reads draft.created.newBlockIds and independently places the caret in a newly created block (no message from BlockManager); paints CSS highlights; threads every event through ClipboardManager
 %% fm:meta selectionManager state=selection: SelectionState (anchor, focus, mode)
 %% fm:meta selectionManager state=wsaEl: HTMLElement | null
 %% fm:meta selectionManager i0.name=receiveMouseEvent
@@ -345,6 +345,7 @@ flowchart LR
 %% fm:meta docDraft desc=the conduit payload; committed currentReadOnly slices + proposed slices per channel; built by WSA, threaded through every manager
 %% fm:meta docDraft state=dataSet: DraftChannel of file/content/layout/database
 %% fm:meta docDraft state=selection: currentBlocks + proposedBlocks + caret
+%% fm:meta docDraft state=created: newBlockIds (BlockManager writes, SelectionManager reads to place the caret)
 %% fm:meta docShape name=DocShape
 %% fm:meta docShape desc=the flat effective view (proposed ?? current) every manager and helper reads and returns
 %% fm:meta docShape state=file: FileData | null
@@ -519,6 +520,8 @@ flowchart LR
 
   WorkspaceArea -.->|builds + threads| docDraft
   docDraft -.->|flattened to| docShape
+  blockManager -.->|records new block ids| docDraft
+  selectionManager -.->|reads new block ids, sets caret| docDraft
   WorkspaceArea -.->|seeds from + commits to| workspaceStore
   WorkspaceArea -.->|saves| documentStorage
   WorkspaceArea -.->|picks renderer| componentRegistry
