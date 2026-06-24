@@ -122,27 +122,6 @@ export interface TextElement {
   files: string[];
 }
 
-// The one canonical fresh block. Every new TextElement — a typed paragraph, a
-// database renderer, a database cell — starts from this single default shape, so
-// a block's baseline (and any field added to TextElement later) lives in exactly
-// one place. Callers override only what differs (tag, component, parentId, …).
-export function makeTextElement(
-  overrides: Partial<TextElement> = {},
-): TextElement {
-  return {
-    id: crypto.randomUUID(),
-    component: "ContentArea",
-    Tag: "p",
-    styles: "",
-    classNames: "",
-    innerContent: "",
-    parentId: null,
-    children: null,
-    files: [],
-    ...overrides,
-  };
-}
-
 // ── Panel tile shapes ────────────────────────────────────────────────────
 
 export type PanelTile = FilePanelTile | BlockPanelTile;
@@ -238,10 +217,6 @@ export interface SelectionSnapshot {
   caret: CaretTarget | null;
 }
 
-export function emptySelectionSnapshot(): SelectionSnapshot {
-  return { selectedBlockIds: [], caret: null };
-}
-
 // ── Conduit shape ──────────────────────────────────────────────────────
 // The uniform document slices WSA threads through every conduit helper. WSA
 // seeds it from its rendered store state and hands it to each helper in turn;
@@ -303,154 +278,6 @@ export interface DocDraft {
     newBlockIds: string[] | null;
   };
 }
-
-// Seed a fresh draft from the committed store slices. All proposed start null.
-export function buildDraft(
-  file: FileData | null,
-  content: ContentDataSet,
-  layout: LayoutDataSet,
-  database: DatabaseDataSet,
-  selection: SelectionSnapshot,
-  event: DocDraft["event"],
-): DocDraft {
-  return {
-    event,
-    dataSet: {
-      fileData: { currentReadOnly: file, proposed: null },
-      contentData: { currentReadOnly: content, proposed: null },
-      layoutData: { currentReadOnly: layout, proposed: null },
-      databaseData: { currentReadOnly: database, proposed: null },
-    },
-    selection: {
-      currentBlocks: selection.selectedBlockIds,
-      proposedBlocks: null,
-      caret: {
-        currentBlockId: selection.caret?.blockId ?? null,
-        proposedBlockId: null,
-        currentOffset: selection.caret?.offset ?? null,
-        proposedOffset: null,
-      },
-    },
-    created: { newBlockIds: null },
-  };
-}
-
-// The effective flat view a manager reads: proposed where a prior manager
-// proposed, else the committed current. This is what makes the bm->sm->dm->lm
-// chain see each other's work while currentReadOnly stays untouched.
-export function draftToFlat(draft: DocDraft): DocShape {
-  const ds = draft.dataSet;
-  return {
-    file: ds.fileData.proposed ?? ds.fileData.currentReadOnly,
-    contentData: ds.contentData.proposed ?? ds.contentData.currentReadOnly,
-    layoutData: ds.layoutData.proposed ?? ds.layoutData.currentReadOnly,
-    databaseData: ds.databaseData.proposed ?? ds.databaseData.currentReadOnly,
-    selection: snapshotOf(draft.selection),
-  };
-}
-
-// Fold a manager's freshly-built flat shape back onto the draft's proposed
-// slots. A slice changed only when the manager returned a new reference for it,
-// so an untouched slice keeps whatever a prior manager proposed (or null). The
-// managers are already immutable (they spread {...shape} and replace only the
-// slice they changed), which is what makes the reference check reliable.
-export function foldIntoDraft(
-  draft: DocDraft,
-  before: DocShape,
-  next: DocShape,
-): DocDraft {
-  if (next === before) return draft;
-  const ds = draft.dataSet;
-
-  const fileProposed =
-    next.file !== before.file ? next.file : ds.fileData.proposed;
-  const contentProposed =
-    next.contentData !== before.contentData
-      ? next.contentData
-      : ds.contentData.proposed;
-  const layoutProposed =
-    next.layoutData !== before.layoutData
-      ? next.layoutData
-      : ds.layoutData.proposed;
-  const databaseProposed =
-    next.databaseData !== before.databaseData
-      ? next.databaseData
-      : ds.databaseData.proposed;
-
-  return {
-    ...draft,
-    dataSet: {
-      fileData: { ...ds.fileData, proposed: fileProposed },
-      contentData: { ...ds.contentData, proposed: contentProposed },
-      layoutData: { ...ds.layoutData, proposed: layoutProposed },
-      databaseData: { ...ds.databaseData, proposed: databaseProposed },
-    },
-    selection: foldSelection(draft, before.selection, next.selection),
-    created: collectCreated(draft, contentProposed),
-  };
-}
-
-// The committed SelectionSnapshot the managers + commit read from the channel.
-function snapshotOf(sel: DocDraft["selection"]): SelectionSnapshot {
-  const ids = sel.proposedBlocks ?? sel.currentBlocks;
-  const blockId = sel.caret.proposedBlockId ?? sel.caret.currentBlockId;
-  const offset = sel.caret.proposedOffset ?? sel.caret.currentOffset;
-  const caret = blockId !== null ? { blockId, offset: offset ?? 0 } : null;
-  return { selectedBlockIds: ids, caret };
-}
-
-// Write selection onto proposed only when this manager actually changed it.
-// Value comparison, because buildShape() hands back a fresh snapshot object
-// every event even on a no-op.
-function foldSelection(
-  draft: DocDraft,
-  before: SelectionSnapshot,
-  next: SelectionSnapshot,
-): DocDraft["selection"] {
-  const cur = draft.selection;
-  if (sameSnapshot(next, before)) return cur;
-  return {
-    currentBlocks: cur.currentBlocks,
-    proposedBlocks: next.selectedBlockIds,
-    caret: {
-      currentBlockId: cur.caret.currentBlockId,
-      currentOffset: cur.caret.currentOffset,
-      proposedBlockId: next.caret ? next.caret.blockId : null,
-      proposedOffset: next.caret ? next.caret.offset : null,
-    },
-  };
-}
-
-// Ids present in the proposed content but absent from the committed content.
-function collectCreated(
-  draft: DocDraft,
-  contentProposed: ContentDataSet | null,
-): DocDraft["created"] {
-  if (contentProposed === null) return draft.created;
-  const current = draft.dataSet.contentData.currentReadOnly;
-  const ids = Object.keys(contentProposed).filter((id) => !(id in current));
-  return { newBlockIds: ids.length > 0 ? ids : null };
-}
-
-function sameSnapshot(a: SelectionSnapshot, b: SelectionSnapshot): boolean {
-  if (!sameCaret(a.caret, b.caret)) return false;
-  if (a.selectedBlockIds.length !== b.selectedBlockIds.length) return false;
-  for (let i = 0; i < a.selectedBlockIds.length; i++) {
-    if (a.selectedBlockIds[i] !== b.selectedBlockIds[i]) return false;
-  }
-  return true;
-}
-
-function sameCaret(a: CaretTarget | null, b: CaretTarget | null): boolean {
-  if (a === null || b === null) return a === b;
-  return a.blockId === b.blockId && a.offset === b.offset;
-}
-
-// Composite key so one block can be placed in many files without collisions.
-// (Same block twice in the SAME file would need a unique placement id instead —
-//  a later step, since selection + the DOM currently key off blockId.)
-export const layoutKey = (fileId: string, blockId: string): string =>
-  `${fileId}:${blockId}`;
 
 // ── Database model ───────────────────────────────────────────────────────
 // A database block is the same kind of dumb renderer as a text block: a
@@ -537,11 +364,6 @@ export interface DbFilter {
 // id is the key, mirroring how LayoutDataSet keys by placement).
 export type DatabaseDataSet = Record<string, DatabaseConfiguration>;
 
-// Composite key helper kept for symmetry with layoutKey. A database is keyed by
-// its block id alone today; this exists so call sites read the same way and a
-// future per-file database instance can slot in without churn.
-export const databaseKey = (blockId: string): string => blockId;
-
 // ── Cell renderer contract ───────────────────────────────────────────────
 // The uniform prop shape every typed cell renderer receives. A renderer is
 // chosen by column type via CELL_REGISTRY; keeping these props uniform is what
@@ -560,12 +382,6 @@ export interface CellProps {
     trigger: TriggerWord,
   ) => void;
 }
-
-// A checkbox cell stores its boolean as the cell block's innerContent: this
-// literal when checked, "" when unchecked. Lives here as the shared encoding
-// contract so the renderer (reads it) and BlockManager (writes it on toggle)
-// agree without one importing the other.
-//export const CHECKBOX_CHECKED = "true";
 
 // ── Drag-container ───────────────────────────────────────────────────────
 

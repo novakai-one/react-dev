@@ -19,4 +19,4 @@ export {
   emptySelectionSnapshot,
   draftToFlat,
   foldIntoDraft,
-} from "../../../../types/types";
+} from "../../../draft";

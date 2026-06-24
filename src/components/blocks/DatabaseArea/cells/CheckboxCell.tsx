@@ -9,7 +9,7 @@
 // reflects the new value. Same conduit, same "manager decides" rule as text
 // cells, just a different gesture.
 
-import { CHECKBOX_CHECKED } from "../../../../types/types";
+import { CHECKBOX_CHECKED } from "../../../../model/model";
 import type { CellProps, MouseEventData } from "../../../../types/types";
 import "./cells.css";
 

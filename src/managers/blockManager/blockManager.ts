@@ -3,6 +3,8 @@ import {
   layoutKey,
   databaseKey,
   CHECKBOX_CHECKED,
+} from "../../model/model";
+import {
   type DocDraft,
   type TextElement,
   type LayoutItem,

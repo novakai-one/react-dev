@@ -6,7 +6,7 @@ import type {
     TextElement,
     KeyEventData,
 } from "../../../types/types"
-import { layoutKey } from "../../../types/types"
+import { layoutKey } from "../../../model/model"
 import type { SelectionPoint } from "../selection/core/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { freshId } from "./ids"

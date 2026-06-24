@@ -5,7 +5,7 @@ import type {
     DatabaseDataSet,
     TextElement,
 } from "../../../types/types"
-import { layoutKey, databaseKey } from "../../../types/types"
+import { layoutKey, databaseKey } from "../../../model/model"
 import type { SelectionPoint } from "../selection/core/selectionState"
 import { clipboardStore, type ClipboardSlice } from "./clipboardStore"
 import { resolveSelectedIds } from "./selectionRange"

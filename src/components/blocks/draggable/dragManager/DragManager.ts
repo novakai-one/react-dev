@@ -27,7 +27,8 @@ import type {
   DocShape,
   DocDraft,
 } from "../../../../types/types";
-import { layoutKey, draftToFlat, foldIntoDraft } from "../../../../types/types";
+import { draftToFlat, foldIntoDraft } from "../../../../managers/draft";
+import { layoutKey } from "../../../../model/model";
 
 type Position = {
   x: number;

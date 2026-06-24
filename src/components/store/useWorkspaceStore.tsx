@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { FileData, FilesDataSet, ContentDataSet, LayoutDataSet, DatabaseDataSet, SelectionSnapshot } from '../../types/types'
-import { emptySelectionSnapshot } from '../../types/types'
+import { emptySelectionSnapshot } from '../../managers/draft'
 
 // Which block to put the caret in after a structural change has rendered.
 // BlockManager sets it; WSA reads it once in a post-render effect and clears it.

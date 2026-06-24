@@ -10,7 +10,7 @@
 
 import { GRID_UNIT, rowsForHeight, heightForRows, snapToGrid } from '../grid/grid'
 import { resolveCollisions } from '../collision-manager/collisionManager'
-import { layoutKey } from '../../../types/types'
+import { layoutKey } from '../../../model/model'
 import type { LayoutDataSet, LayoutItem } from '../../../types/types'
 
 

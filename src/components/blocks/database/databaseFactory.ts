@@ -6,7 +6,7 @@
 // them into ContentDataSet so each cell edits through the same contentEditable
 // path as every other block. No DOM, no store, no side effects here.
 
-import { makeTextElement } from '../../../types/types'
+import { makeTextElement } from '../../../model/model'
 import type {
     DatabaseConfiguration,
     DbColumn,

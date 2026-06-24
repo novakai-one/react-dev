@@ -5,7 +5,7 @@ import type {
     DatabaseDataSet,
     FileData,
 } from "../../../types/types"
-import { layoutKey, databaseKey } from "../../../types/types"
+import { layoutKey, databaseKey } from "../../../model/model"
 import type { SelectionPoint } from "../selection/core/selectionState"
 import { clipboardStore } from "./clipboardStore"
 import { buildSlice } from "./copy"

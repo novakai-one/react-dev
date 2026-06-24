@@ -11,7 +11,8 @@ import type {
   SelectionSnapshot,
   DocDraft,
 } from "../../types/types";
-import { layoutKey, buildDraft } from "../../types/types";
+import { buildDraft } from "../../managers/draft";
+import { layoutKey } from "../../model/model";
 import type { TriggerWord } from "../../types/trigger-words";
 import type { NewSelectionManager } from "../../managers/selection/selection/NEWSelectionManager";
 import type DragManager from "../../components/blocks/draggable/dragManager/DragManager";

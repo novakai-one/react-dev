@@ -19,7 +19,7 @@ import type {
   DocShape,
   DocDraft,
 } from "../../types/types";
-import { draftToFlat, foldIntoDraft } from "../../types/types";
+import { draftToFlat, foldIntoDraft } from "../draft";
 import {
   resolveFileCollisions,
   orderByPosition,
