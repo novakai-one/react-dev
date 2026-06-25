@@ -16,3 +16,4 @@ React + Vite + TypeScript; Supabase storage (local for now).
 ## After any module change
 - Update `src/flowmap-mermaid/novakai.mmd` for the modules you touched.
 - Put the last-updated date on line 2 of the mermaid code.
+- include date modified date using date in Melbourne, Australia GMT+10 //Last modified: 
