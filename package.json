@@ -18,6 +18,8 @@
     "verify:lint": "eslint src",
     "verify:deps": "depcruise src --config .dependency-cruiser.cjs",
     "flowmap:bundle":   "node tools/flowmap/bundle.mjs --root docs/flowmap/root.mmd --dir src > docs/flowmap/_bundle.mmd",
+    "flowmap:bodies":   "node ../../flowmap/tools/buildspec/extract.mjs --tsconfig tsconfig.app.json --out /tmp/novakai-flowmap.mmd && cp /tmp/novakai-flowmap.bodies.json ../../flowmap/public/bodies.json && echo 'bodies.json -> flowmap/public/'",
+    "flowmap:ship":     "npm run flowmap:bundle && npm run flowmap:bodies && echo 'DONE: load docs/flowmap/_bundle.mmd in flowmap; source tab is populated.'",
     "flowmap:check":    "node tools/flowmap/bundle.mjs --check --root docs/flowmap/root.mmd --dir src",
     "flowmap:validate": "node tools/flowmap/validate.mjs docs/flowmap/_bundle.mmd",
     "flowmap:test":     "node tools/flowmap/bundle.mjs --check --root tools/flowmap/fixtures/root.mmd tools/flowmap/fixtures/blockManager.mmd tools/flowmap/fixtures/selectionManager.mmd && node tools/flowmap/bundle.mjs --root tools/flowmap/fixtures/root.mmd tools/flowmap/fixtures/blockManager.mmd tools/flowmap/fixtures/selectionManager.mmd > tools/flowmap/fixtures/_out.mmd && node tools/flowmap/validate.mjs tools/flowmap/fixtures/_out.mmd"
